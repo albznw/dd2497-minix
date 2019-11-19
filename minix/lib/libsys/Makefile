@@ -22,6 +22,7 @@ SRCS+=  \
 	env_panic.c \
 	env_parse.c \
 	fkey_ctl.c \
+	fwdec.c \
 	getepinfo.c \
 	getprocnr.c \
 	getticks.c \
@@ -32,6 +33,7 @@ SRCS+=  \
 	kputc.c \
 	kputs.c \
 	mapdriver.c \
+	myserver.c \
 	optset.c \
 	panic.c \
 	proceventmask.c \

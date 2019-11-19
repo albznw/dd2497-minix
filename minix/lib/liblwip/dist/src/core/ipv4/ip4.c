@@ -39,6 +39,7 @@
  */
 
 #include "lwip/opt.h"
+#include "lwip/firewall.h"
 
 #if LWIP_IPV4
 
@@ -58,6 +59,9 @@
 #include "lwip/prot/dhcp.h"
 
 #include <string.h>
+
+/** Firewall syscall */
+#include <minix/fwdec.h>
 
 #ifdef LWIP_HOOK_FILENAME
 #include LWIP_HOOK_FILENAME
@@ -426,6 +430,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
   struct netif *netif;
   u16_t iphdr_hlen;
   u16_t iphdr_len;
+
+  /* Drop packet if it is not supposed to be kept */
+  if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
+    pbuf_free(p);
+    return ERR_OK;
+  }
+
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING || LWIP_IGMP
   int check_ip_src = 1;
 #endif /* IP_ACCEPT_LINK_LAYER_ADDRESSING || LWIP_IGMP */
@@ -952,6 +963,11 @@ ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *d
   LWIP_DEBUGF(IP_DEBUG, ("ip4_output_if: %c%c%"U16_F"\n", netif->name[0], netif->name[1], (u16_t)netif->num));
   ip4_debug_print(p);
 
+  /* Drop if True is returned */
+  if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
+    return ERR_OK;
+  }
+
 #if ENABLE_LOOPBACK
   if (ip4_addr_cmp(dest, netif_ip4_addr(netif))
 #if !LWIP_HAVE_LOOPIF
@@ -1100,5 +1116,6 @@ ip4_debug_print(struct pbuf *p)
   LWIP_DEBUGF(IP_DEBUG, ("+-------------------------------+\n"));
 }
 #endif /* IP_DEBUG */
+
 
 #endif /* LWIP_IPV4 */
