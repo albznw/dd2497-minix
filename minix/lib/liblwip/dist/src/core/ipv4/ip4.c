@@ -432,10 +432,10 @@ ip4_input(struct pbuf *p, struct netif *inp)
   u16_t iphdr_len;
 
   /* Drop packet if it is not supposed to be kept */
-  if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
-    pbuf_free(p);
-    return ERR_OK;
-  }
+  // if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
+  //   pbuf_free(p);
+  //   return ERR_OK;
+  // }
 
 #if IP_ACCEPT_LINK_LAYER_ADDRESSING || LWIP_IGMP
   int check_ip_src = 1;
@@ -964,9 +964,9 @@ ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *d
   ip4_debug_print(p);
 
   /* Drop if True is returned */
-  if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
-    return ERR_OK;
-  }
+  // if(pbuf_filter(p) != LWIP_KEEP_PACKET) {
+  //   return ERR_OK;
+  // }
 
 #if ENABLE_LOOPBACK
   if (ip4_addr_cmp(dest, netif_ip4_addr(netif))
