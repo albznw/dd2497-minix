@@ -16,25 +16,34 @@
 #include <fcntl.h> //File handling flags
 #include <sys/time.h> //System time
 
-
 /* Declare local functions. */
-int check_ip4_headers(uint32_t src_ip, uint32_t dst_ip);
-void logToLogfile(char* logfile,char* logEntry, int length);
+static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr);
+static void log(char* log_message);
 
-/* Global variables */
-static int mode = MODE_NOTSET;
+static fw_rule_t default_incoming_rule = {
+  .from_ip = IP_ANY,
+  .to_ip = IP_ANY,
+  .p_name = NULL,
+  .action = FW_RULE_ACCEPT,
+  .next = NULL,
+};
 
-/* Global variables - Configurables */
-const char *LOGFILE = "/var/log/fwdec"; //Where the log file should be placed
-const int defaultMode = MODE_WHITELIST; //Might be exported to config file in the future
-int TCP_PROTECTION_TIMEOUT = 30; //The amount of seconds before a tcp protection entry is reset
-int TCP_MAX_SYNCOUNT = 5; //The maximum amount of suspicious SYN packets allowed from a host
+static fw_rule_t default_outgoing_rule = {
+  .from_ip = IP_ANY,
+  .to_ip = IP_ANY,
+  .p_name = NULL,
+  .action = FW_RULE_ACCEPT,
+  .next = NULL,
+};
 
 static inline uint32_t ip4_from_parts(uint8_t p1, uint8_t p2, uint8_t p3, uint8_t p4)
 {
   uint32_t result = p4 << 24 | p3 << 16 | p2 << 8 | p1;
   return result;
 }
+
+/* Global variables - Configurables */
+const char *LOGFILE = "/var/log/fwdec"; //Where the log file should be placed
 
 /*===========================================================================*
  *		            sef_cb_init_fresh                                        *
@@ -49,26 +58,79 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
  *				do_publish				                                     *
  *===========================================================================*/
 
-int check_ip4_headers(uint32_t src_ip, uint32_t dst_ip)
-{
-  uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
-
-  if (dst_ip == kth_ip) {
-    return LWIP_DROP_PACKET;
-  }
-
+int check_incoming_ip4(uint32_t src_ip) {
   return LWIP_KEEP_PACKET;
 }
 
-void logToLogfile(char* logFile,char* logEntry, int length){
-  //Writes logentry to logfile using vfs syscall wrappers
-  int fd = open(logFile, O_WRONLY|O_CREAT|O_APPEND);
-  if (fd == -1){
-    printf("Warning: fwdec failed to open log file %s\n",logFile);
+int check_outgoing_ip4(uint32_t dest_ip) {
+  fw_rule_t *rules = &default_outgoing_rule;
+  uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
+
+  fw_rule_t kth_rule = {
+    .from_ip = kth_ip,
+    .to_ip = kth_ip,
+    .action = FW_RULE_REJECT,
+    .next = rules,
+    .p_name = NULL
+  };
+
+  rules = &kth_rule;
+  fw_rule_t *matched_rule = find_matching_rule(rules, dest_ip);
+
+  if (matched_rule->action == FW_RULE_REJECT) {
+    log("Packet dropped\n");
+    return LWIP_DROP_PACKET;
   }
 
-  int bytesWritten = write(fd, logEntry, length);
-  if (bytesWritten != length){
+  log("Packet accepted\n");
+  return LWIP_KEEP_PACKET; 
+}
+
+static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr)
+{
+  fw_rule_t *curr_rule = rules;
+  fw_rule_t *chosen_rule = NULL;
+  uint8_t chosen_flags = 0;
+
+  while (curr_rule != NULL) {
+    uint8_t curr_flags = 0;
+
+    if (curr_rule->from_ip == 0 && curr_rule->to_ip == 0) {
+      curr_flags |= FW_FLAG_ANY_IP;
+    }
+
+    if (curr_rule->from_ip <= ip_addr && ip_addr <= curr_rule->to_ip) {
+      curr_flags |= FW_FLAG_IP_IN_RANGE;
+    }
+
+    if (curr_rule->from_ip == ip_addr && ip_addr == curr_rule->to_ip) {
+      curr_flags |= FW_FLAG_EXACT_IP;
+    }
+
+    if (curr_flags > chosen_flags) {
+      chosen_rule = curr_rule;
+      chosen_flags = curr_flags;
+    }
+    
+    curr_rule = curr_rule->next;
+  }
+
+  return chosen_rule;
+}
+
+static void log(char* log_message)
+{
+  // strncat(log_message, "\n", 1);
+  int fd = open(LOGFILE, O_WRONLY|O_CREAT|O_APPEND);
+
+  if (fd == -1){
+    printf("Warning: fwdec failed to open log file %s\n", LOGFILE);
+    return;
+  }
+
+  int length = strlen(log_message);
+  int written = write(fd, log_message, length);
+  if (written != length){
     printf("Warning: fwdec failed to write to log file");
   }
   close(fd);

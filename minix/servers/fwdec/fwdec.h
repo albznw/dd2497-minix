@@ -21,4 +21,24 @@
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP     6
 
+#define IP_ANY 0
+
+#define FW_RULE_REJECT 1
+#define FW_RULE_ACCEPT 2
+
+#define FW_FLAG_ANY_IP      0x1
+#define FW_FLAG_IP_IN_RANGE 0x2
+#define FW_FLAG_EXACT_IP    0x4
+#define FW_FLAG_PNAME       0x8
+
+struct fw_rule {
+  uint32_t from_ip;
+  uint32_t to_ip;
+  char *p_name;
+  uint8_t action;
+  struct fw_rule *next;
+};
+
+typedef struct fw_rule fw_rule_t;
+
 #endif // _FWDEC_H_

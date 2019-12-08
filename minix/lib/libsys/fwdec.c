@@ -27,11 +27,22 @@ static int do_invoke_fwdec(message *m)
 	}
 }
 
-int fwdec_ip4(uint32_t src_ip, uint32_t dest_ip) {
+int fwdec_ip4_incoming(uint32_t src_ip, uint32_t dest_ip) {
 	message m;
 	memset(&m, 0, sizeof(m));
 
-	m.m_type = FWDEC_QUERY_IP4;
+	m.m_type = FWDEC_QUERY_IP4_INC;
+	m.m_fwdec_ip4.src_ip = src_ip;
+	m.m_fwdec_ip4.dest_ip = dest_ip;
+
+	return do_invoke_fwdec(&m);
+}
+
+int fwdec_ip4_outgoing(uint32_t src_ip, uint32_t dest_ip) {
+	message m;
+	memset(&m, 0, sizeof(m));
+
+	m.m_type = FWDEC_QUERY_IP4_OUT;
 	m.m_fwdec_ip4.src_ip = src_ip;
 	m.m_fwdec_ip4.dest_ip = dest_ip;
 

@@ -5,12 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 /* Allocate space for the global variables. */
 static endpoint_t who_e;	/* caller's proc number */
 static int callnr;		/* system call number */
 static uint32_t ip4_src_ip;
-static uint32_t ip4_dst_ip;
+static uint32_t ip4_dest_ip;
 
 /* Declare local functions. */
 static void get_work(message *m_ptr);
@@ -48,8 +49,11 @@ int main(int argc, char **argv)
           goto send_reply;
       }
       switch (callnr) {
-      case FWDEC_QUERY_IP4:
-          result = check_ip4_headers(ip4_src_ip, ip4_dst_ip);
+      case FWDEC_QUERY_IP4_INC:
+          result = check_incoming_ip4(ip4_src_ip);
+          break;
+      case FWDEC_QUERY_IP4_OUT:
+          result = check_outgoing_ip4(ip4_dest_ip);
           break;
       default: 
           printf("fwdec: warning, got illegal request from %d\n", m.m_source);
@@ -93,7 +97,7 @@ static void get_work(
     who_e = m_ptr->m_source;        /* message arrived! set sender */
     callnr = m_ptr->m_type;       /* set function call number */
     ip4_src_ip = m_ptr->m_fwdec_ip4.src_ip;
-    ip4_dst_ip = m_ptr->m_fwdec_ip4.dest_ip;
+    ip4_dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
 }
 
 /*===========================================================================*

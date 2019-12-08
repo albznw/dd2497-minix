@@ -514,6 +514,11 @@ ip4_input(struct pbuf *p, struct netif *inp)
   ip_addr_copy_from_ip4(ip_data.current_iphdr_dest, iphdr->dest);
   ip_addr_copy_from_ip4(ip_data.current_iphdr_src, iphdr->src);
 
+  if (ip4_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr()) != LWIP_KEEP_PACKET) {
+    pbuf_free(p);
+    return ERR_OK;
+  }
+
   /* match packet against an interface, i.e. is this packet for us? */
   if (ip4_addr_ismulticast(ip4_current_dest_addr())) {
 #if LWIP_IGMP
@@ -957,8 +962,7 @@ ip4_output_if_opt_src(struct pbuf *p, const ip4_addr_t *src, const ip4_addr_t *d
   LWIP_DEBUGF(IP_DEBUG, ("ip4_output_if: %c%c%"U16_F"\n", netif->name[0], netif->name[1], (u16_t)netif->num));
   ip4_debug_print(p);
 
-  if (ip4_query_firewall(src, dest) != LWIP_KEEP_PACKET) {
-    // printf("Dropped packet to %s\n\n", ip4addr_ntoa(dest));
+  if (ip4_fw_outgoing(src, dest) != LWIP_KEEP_PACKET) {
     return ERR_OK;
   }
 
