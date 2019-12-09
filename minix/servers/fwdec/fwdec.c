@@ -48,6 +48,24 @@ int TCP_MAX_SYNCOUNT = 5; //The maximum amount of suspicious SYN packets allowed
 int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
 {
   printf("Firewall decision server started\n");
+  FILE *fp;
+  char cmd[64];
+//  char path[128];
+  char ch;
+  snprintf(cmd, sizeof(cmd), "sh get_pname_from_pid.sh %d", 1);
+  system(cmd);
+  //fp = popen(cmd, "r");
+  //fgets(path, sizeof(path), fp);
+  fp = fopen("temp.txt", "r");
+  printf("Testing process name access... PID=1 is ");
+  ch = fgetc(fp);
+  while (ch != EOF) {
+    printf("%c", ch);
+    ch = fgetc(fp);
+  }
+  fclose(fp);
+//  printf("%s\n", path);
+//  pclose(fp);
   return(OK);
 }
 
