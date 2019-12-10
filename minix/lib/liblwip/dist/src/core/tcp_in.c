@@ -258,6 +258,8 @@ tcp_input(struct pbuf *p, struct netif *inp)
            of the list since we are not very likely to receive that
            many segments for connections in TIME-WAIT. */
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for TIME_WAITing connection.\n"));
+
+        //TODO Add firewall hook here?
         tcp_timewait_input(pcb);
         pbuf_free(p);
         return;
@@ -317,6 +319,8 @@ tcp_input(struct pbuf *p, struct netif *inp)
       }
 
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for LISTENing connection.\n"));
+
+      //TODO Add firewall hook here? 
       tcp_listen_input(lpcb);
       pbuf_free(p);
       return;
@@ -335,6 +339,13 @@ tcp_input(struct pbuf *p, struct netif *inp)
 #if TCP_INPUT_DEBUG
     tcp_debug_print_state(pcb->state);
 #endif /* TCP_INPUT_DEBUG */
+
+    //TODO replace with hook to firewall
+    char src_addr[46], dest_addr[46];
+    ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
+    ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
+    printf("TCP packet going in. src: %s:%d, dst: %s:%d, endpoint: %d\n",
+            src_addr, tcphdr->src, dest_addr, tcphdr->dest, tcp_get_user_endp(pcb));
 
     /* Set up a tcp_seg structure. */
     inseg.next = NULL;

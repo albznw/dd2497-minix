@@ -27,25 +27,24 @@ static int do_invoke_fwdec(message *m)
 	}
 }
 
-/*
- * Check packet function
- * Takes a pbuf and extracts source ip, destination ip, ports and protocol
- * Sends an IPC to the firewall
- */
-int fwdec_check_packet(int protocol, int src_ip, int dst_ip, int src_port, int dst_port, int tcp_syn, int tcp_ack)
-{
+int fwdec_ip4_incoming(uint32_t src_ip, uint32_t dest_ip) {
 	message m;
 	memset(&m, 0, sizeof(m));
 
-	/* Prepare the request message for the firewall */
-	m.m_type = FWDEC_CHECK_PACKET;
-	m.m_fw_filter.protocol = protocol;
-	m.m_fw_filter.src_ip = src_ip;
-	m.m_fw_filter.dst_ip = dst_ip;
-	m.m_fw_filter.src_port = src_port;
-	m.m_fw_filter.dst_port = dst_port;
-  m.m_fw_filter.tcp_syn = tcp_syn;
-  m.m_fw_filter.tcp_ack= tcp_ack;
+	m.m_type = FWDEC_QUERY_IP4_INC;
+	m.m_fwdec_ip4.src_ip = src_ip;
+	m.m_fwdec_ip4.dest_ip = dest_ip;
+
+	return do_invoke_fwdec(&m);
+}
+
+int fwdec_ip4_outgoing(uint32_t src_ip, uint32_t dest_ip) {
+	message m;
+	memset(&m, 0, sizeof(m));
+
+	m.m_type = FWDEC_QUERY_IP4_OUT;
+	m.m_fwdec_ip4.src_ip = src_ip;
+	m.m_fwdec_ip4.dest_ip = dest_ip;
 
 	return do_invoke_fwdec(&m);
 }

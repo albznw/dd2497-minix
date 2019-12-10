@@ -21,22 +21,24 @@
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP     6
 
-struct Rule_s {
-  struct Rule_s *next;
-  uint8_t proto;
-  uint32_t srcIp;
-  uint32_t dstIp;
-  uint16_t srcPort;
-  uint16_t dstPort;
-} RuleDefault = {0, 0, 0, 0, 0};
-typedef struct Rule_s Rule;
+#define IP_ANY 0
 
-struct tcpSynProt_s {//Used for keeping track of syn-scan and syn dos attacks
-  struct tcpSynProt_s *next;
-  uint32_t srcIp;
-  uint32_t synCount;//The number of TCP syn packets recieved without subsequent ACK packets
-  time_t timestamp;
+#define FW_RULE_REJECT 1
+#define FW_RULE_ACCEPT 2
+
+#define FW_FLAG_ANY_IP      0x1
+#define FW_FLAG_IP_IN_RANGE 0x2
+#define FW_FLAG_EXACT_IP    0x4
+#define FW_FLAG_PNAME       0x8
+
+struct fw_rule {
+  uint32_t from_ip;
+  uint32_t to_ip;
+  char *p_name;
+  uint8_t action;
+  struct fw_rule *next;
 };
-typedef struct tcpSynProt_s tcpSynProt;
 
-#endif
+typedef struct fw_rule fw_rule_t;
+
+#endif // _FWDEC_H_

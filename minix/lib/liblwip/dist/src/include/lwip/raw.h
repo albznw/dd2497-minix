@@ -126,6 +126,9 @@ void raw_netif_ip_addr_changed(const ip_addr_t* old_addr, const ip_addr_t* new_a
 /* for compatibility with older implementation */
 #define raw_new_ip6(proto) raw_new_ip_type(IPADDR_TYPE_V6, proto)
 
+#define raw_set_user_endp(pcb, value)       ((pcb)->user_endp = (value))
+#define raw_get_user_endp(pcb)              ((pcb)->user_endp)
+
 #if LWIP_MULTICAST_TX_OPTIONS
 #define raw_set_multicast_netif_index(pcb, idx) ((pcb)->mcast_ifindex = (idx))
 #define raw_get_multicast_netif_index(pcb)      ((pcb)->mcast_ifindex)

@@ -1163,7 +1163,8 @@
 
 #define FWDEC_BASE 0X1C00
 
-#define FWDEC_CHECK_PACKET 	(FWDEC_BASE + 0)	/* Drop packet or not */
+#define FWDEC_QUERY_IP4_INC (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
+#define FWDEC_QUERY_IP4_OUT (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
 
 /*===========================================================================*
 *		Messages for the LWIP server		     *

@@ -9,6 +9,7 @@
 /* fwdec.c */
 
 /* U32 */
-int fwdec_check_packet(int protocol, int src_ip, int dst_ip, int src_port, int dst_port, int tcp_syn, int tcp_ack);
+int fwdec_ip4_incoming(uint32_t src_ip, uint32_t dest_ip);
+int fwdec_ip4_outgoing(uint32_t src_ip, uint32_t dest_ip);
 
 #endif /* _MINIX_FWDEC_H */

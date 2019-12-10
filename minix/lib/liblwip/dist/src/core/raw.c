@@ -168,6 +168,13 @@ raw_input(struct pbuf *p, struct netif *inp)
         /* the receive callback function did not eat the packet? */
         eaten = pcb->recv(pcb->recv_arg, pcb, p, ip_current_src_addr());
         if (eaten != 0) {
+
+          //TODO replace with hook to firewall
+          char src_addr[46], dest_addr[46];
+          ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
+          ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
+          printf("RAW packet going in. src: %s, dst: %s, endpoint: %d\n", src_addr, dest_addr, raw_get_user_endp(pcb));
+
           /* receive function ate the packet */
           p = NULL;
           eaten = 1;
@@ -393,6 +400,12 @@ raw_sendto_if_src(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
       !IP_ADDR_PCB_VERSION_MATCH(pcb, src_ip) || !IP_ADDR_PCB_VERSION_MATCH(pcb, dst_ip)) {
     return ERR_VAL;
   }
+
+  //TODO replace with hook to firewall
+  char src_addr[46], dest_addr[46];
+  ipaddr_ntoa_r(src_ip, src_addr, 46);
+  ipaddr_ntoa_r(dst_ip, dest_addr, 46);
+  printf("RAW packet going out. src: %s, dst: %s, endpoint: %d\n", src_addr, dest_addr, raw_get_user_endp(pcb));
 
   header_size = (
 #if LWIP_IPV4 && LWIP_IPV6
