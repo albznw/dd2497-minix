@@ -80,9 +80,7 @@ void
 icmp_input(struct pbuf *p, struct netif *inp)
 {
   u8_t type;
-#ifdef LWIP_DEBUG
   u8_t code;
-#endif /* LWIP_DEBUG */
   struct icmp_echo_hdr *iecho;
   const struct ip_hdr *iphdr_in;
   u16_t hlen;
@@ -102,10 +100,15 @@ icmp_input(struct pbuf *p, struct netif *inp)
     goto lenerr;
   }
 
-  type = *((u8_t *)p->payload);
-#ifdef LWIP_DEBUG
   code = *(((u8_t *)p->payload)+1);
-#endif /* LWIP_DEBUG */
+  type = *((u8_t *)p->payload);
+
+  //TODO replace with hook to firewall
+  char src_addr[46], dest_addr[46];
+  ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
+  ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
+  printf("ICMP packet going in. src: %s, dest: %s, type: %d, code: %d\n", src_addr, dest_addr, type, code);
+
   switch (type) {
   case ICMP_ER:
     /* This is OK, echo reply might have been parsed by a raw PCB
@@ -240,6 +243,12 @@ icmp_input(struct pbuf *p, struct netif *inp)
       MIB2_STATS_INC(mib2.icmpoutechoreps);
 
       /* send an ICMP packet */
+
+      //TODO replace with hook to firewall
+      ipaddr_ntoa_r(ip_current_dest_addr(), src_addr, 46);
+      ipaddr_ntoa_r(ip_current_src_addr(), dest_addr, 46);
+      printf("ICMP packet going out. src: %s, dest: %s, type: 0, code: 0\n", src_addr, dest_addr);
+
       ret = ip4_output_if(p, src, LWIP_IP_HDRINCL,
                    ICMP_TTL, 0, IP_PROTO_ICMP, inp);
       if (ret != ERR_OK) {
@@ -336,7 +345,7 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
   struct ip_hdr *iphdr;
   /* we can use the echo header here */
   struct icmp_echo_hdr *icmphdr;
-  ip4_addr_t iphdr_src;
+  ip4_addr_t iphdr_src, iphdr_dest;
   struct netif *netif;
 
   /* increase number of messages attempted to send */
@@ -371,6 +380,7 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
           IP_HLEN + ICMP_DEST_UNREACH_DATASIZE);
 
   ip4_addr_copy(iphdr_src, iphdr->src);
+  ip4_addr_copy(iphdr_dest, iphdr->dest);
 #ifdef LWIP_HOOK_IP4_ROUTE_SRC
   {
     ip4_addr_t iphdr_dst;
@@ -389,6 +399,13 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
     }
 #endif
     ICMP_STATS_INC(icmp.xmit);
+
+    //TODO replace with hook to firewall
+    char src_addr[46], dest_addr[46];
+    ip4addr_ntoa_r(&iphdr_src, src_addr, 46);
+    ip4addr_ntoa_r(&iphdr_dest, dest_addr, 46);
+    printf("ICMP packet going out. src: %s, dest: %s, type: %d, code: %d\n", src_addr, dest_addr, type, code);
+
     ip4_output_if(q, NULL, &iphdr_src, ICMP_TTL, 0, IP_PROTO_ICMP, netif);
   }
   pbuf_free(q);

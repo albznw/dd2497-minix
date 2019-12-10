@@ -1192,6 +1192,13 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
   u16_t len;
   u32_t *opts;
 
+  //TODO replace with hook to firewall
+  char src_addr[46], dest_addr[46];
+  ipaddr_ntoa_r(&pcb->local_ip, src_addr, 46);
+  ipaddr_ntoa_r(&pcb->remote_ip, dest_addr, 46);
+  printf("TCP packet going out. src: %s:%d, dst: %s:%d, endpoint: %d\n",
+          src_addr, pcb->local_port, dest_addr, pcb->remote_port, tcp_get_user_endp(pcb));
+
   if (seg->p->ref != 1) {
     /* This can happen if the pbuf of this segment is still referenced by the
        netif driver due to deferred transmission. Since this function modifies

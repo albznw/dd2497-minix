@@ -10,6 +10,7 @@ ssize_t util_coalesce(char * buf, size_t max, const iovec_t * iov,
 	unsigned int iovcnt);
 int util_convert_err(err_t err);
 int util_is_root(endpoint_t user_endpt);
+int util_get_process(endpoint_t user_endpt);
 ssize_t util_pcblist(struct rmib_call * call, struct rmib_oldp * oldp,
 	const void *(*enum_proc)(const void *),
 	void (*get_info_proc)(struct kinfo_pcb *, const void *));

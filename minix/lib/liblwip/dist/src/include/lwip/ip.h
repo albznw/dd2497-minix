@@ -81,6 +81,8 @@ extern "C" {
   u8_t so_options;      \
    /* Type Of Service */ \
   u8_t tos;              \
+  /* User process connected to this PCB */ \
+  endpoint_t user_endp;  \
   /* Time To Live */     \
   u8_t ttl               \
   /* link layer address resolution hint */ \
