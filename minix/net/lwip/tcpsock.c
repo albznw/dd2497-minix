@@ -240,7 +240,7 @@ tcpsock_reset_recv(struct tcpsock * tcp)
  */
 sockid_t
 tcpsock_socket(int domain, int protocol, struct sock ** sockp,
-	const struct sockevent_ops ** ops)
+	const struct sockevent_ops ** ops, endpoint_t user_endpt)
 {
 	struct tcpsock *tcp;
 	uint8_t ip_type;
@@ -270,6 +270,9 @@ tcpsock_socket(int domain, int protocol, struct sock ** sockp,
 
 	if ((tcp->tcp_pcb = tcp_new_ip_type(ip_type)) == NULL)
 		return ENOBUFS;
+
+	tcp_set_user_endp(tcp->tcp_pcb, user_endpt);
+
 	tcp_arg(tcp->tcp_pcb, tcp);
 
 	tcp->tcp_listener = NULL;
