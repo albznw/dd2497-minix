@@ -5,6 +5,7 @@
  *   do_getsysinfo: request copy of PM data structure  (Jorrit N. Herder)
  *   do_getprocnr: lookup endpoint by process ID
  *   do_getepinfo: get the pid/uid/gid of a process given its endpoint
+ *   do_getepname: get the name of a process given its endpoint
  *   do_getsetpriority: get/set process priority
  *   do_svrctl: process manager control
  *   do_getrusage: obtain process resource usage information
@@ -190,6 +191,25 @@ int do_getepinfo(void)
 		return(r);
   }
   return(rmp->mp_pid);
+}
+
+/*===========================================================================*
+ *				do_getepname			             *
+ *===========================================================================*/
+int do_getepname(void)
+{
+  struct mproc *rmp;
+  endpoint_t ep;
+  int slot;
+
+  ep = m_in.m_lsys_pm_getepinfo.endpt;
+  if (pm_isokendpt(ep, &slot) != OK)
+	  return(ESRCH);	//no such process
+  rmp = &mproc[slot];
+  //reply with mp_name
+  strncpy(mp->mp_reply.m_pm_lsys_getepname.proc_name, rmp->mp_name, PROC_NAME_LEN); // Cannot fail
+
+  return OK;
 }
 
 /*===========================================================================*

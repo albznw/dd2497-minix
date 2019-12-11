@@ -56,10 +56,11 @@
 #define PM_EXEC_NEW		(PM_BASE + 43)
 #define PM_EXEC_RESTART		(PM_BASE + 44)
 #define PM_GETEPINFO		(PM_BASE + 45)
-#define PM_GETPROCNR		(PM_BASE + 46)
-#define PM_GETSYSINFO		(PM_BASE + 47)
+#define PM_GETEPNAME		(PM_BASE + 46)
+#define PM_GETPROCNR		(PM_BASE + 47)
+#define PM_GETSYSINFO		(PM_BASE + 48)
 
-#define NR_PM_CALLS		48	/* highest number from base plus one */
+#define NR_PM_CALLS		49	/* highest number from base plus one */
 
 /*===========================================================================*
  *				Calls to VFS				     *

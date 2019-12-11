@@ -1414,6 +1414,13 @@ typedef struct {
 _ASSERT_MSG_SIZE(mess_lsys_pm_getepinfo);
 
 typedef struct {
+	endpoint_t endpt;
+
+	uint8_t padding[52];
+} mess_lsys_pm_getepname;
+_ASSERT_MSG_SIZE(mess_lsys_pm_getepname);
+
+typedef struct {
 	pid_t pid;
 
 	uint8_t padding[52];
@@ -1804,6 +1811,13 @@ typedef struct {
 	uint8_t padding[36];
 } mess_pm_lsys_getepinfo;
 _ASSERT_MSG_SIZE(mess_pm_lsys_getepinfo);
+
+typedef struct {
+	char proc_name[PROC_NAME_LEN];
+
+	uint8_t padding[56 - PROC_NAME_LEN];
+} mess_pm_lsys_getepname;
+_ASSERT_MSG_SIZE(mess_pm_lsys_getepname);
 
 typedef struct {
 	endpoint_t endpt;
@@ -2571,6 +2585,7 @@ typedef struct noxfer_message {
 		mess_lsys_mib_reply	m_lsys_mib_reply;
 		mess_lsys_pci_busc_get_bar m_lsys_pci_busc_get_bar;
 		mess_lsys_pm_getepinfo	m_lsys_pm_getepinfo;
+		mess_lsys_pm_getepname	m_lsys_pm_getepname;
 		mess_lsys_pm_getprocnr	m_lsys_pm_getprocnr;
 		mess_lsys_pm_proceventmask m_lsys_pm_proceventmask;
 		mess_lsys_pm_srv_fork	m_lsys_pm_srv_fork;
@@ -2615,6 +2630,7 @@ typedef struct noxfer_message {
 		mess_pm_lc_wait4	m_pm_lc_wait4;
 		mess_pm_lexec_exec_new	m_pm_lexec_exec_new;
 		mess_pm_lsys_getepinfo	m_pm_lsys_getepinfo;
+		mess_pm_lsys_getepname	m_pm_lsys_getepname;
 		mess_pm_lsys_getprocnr	m_pm_lsys_getprocnr;
 		mess_pm_lsys_proc_event	m_pm_lsys_proc_event;
 		mess_pm_lsys_sigs_signal m_pm_lsys_sigs_signal;
