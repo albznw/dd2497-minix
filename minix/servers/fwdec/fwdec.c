@@ -21,16 +21,16 @@ static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr);
 static void log(char* log_message);
 
 static fw_rule_t default_incoming_rule = {
-  .from_ip = IP_ANY,
-  .to_ip = IP_ANY,
+  .ip_start = IP_ANY,
+  .ip_end = IP_ANY,
   .p_name = NULL,
   .action = FW_RULE_ACCEPT,
   .next = NULL,
 };
 
 static fw_rule_t default_outgoing_rule = {
-  .from_ip = IP_ANY,
-  .to_ip = IP_ANY,
+  .ip_start = IP_ANY,
+  .ip_end = IP_ANY,
   .p_name = NULL,
   .action = FW_RULE_ACCEPT,
   .next = NULL,
@@ -67,8 +67,8 @@ int check_outgoing_ip4(uint32_t dest_ip) {
   uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
 
   fw_rule_t kth_rule = {
-    .from_ip = kth_ip,
-    .to_ip = kth_ip,
+    .ip_start = kth_ip,
+    .ip_end = kth_ip,
     .action = FW_RULE_REJECT,
     .next = rules,
     .p_name = NULL
@@ -95,15 +95,15 @@ static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr)
   while (curr_rule != NULL) {
     uint8_t curr_flags = 0;
 
-    if (curr_rule->from_ip == 0 && curr_rule->to_ip == 0) {
+    if (curr_rule->ip_start == 0 && curr_rule->ip_end == 0) {
       curr_flags |= FW_FLAG_ANY_IP;
     }
 
-    if (curr_rule->from_ip <= ip_addr && ip_addr <= curr_rule->to_ip) {
+    if (curr_rule->ip_start <= ip_addr && ip_addr <= curr_rule->ip_end) {
       curr_flags |= FW_FLAG_IP_IN_RANGE;
     }
 
-    if (curr_rule->from_ip == ip_addr && ip_addr == curr_rule->to_ip) {
+    if (curr_rule->ip_start == ip_addr && ip_addr == curr_rule->ip_end) {
       curr_flags |= FW_FLAG_EXACT_IP;
     }
 

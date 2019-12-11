@@ -32,8 +32,8 @@
 #define FW_FLAG_PNAME       0x8
 
 struct fw_rule {
-  uint32_t from_ip;
-  uint32_t to_ip;
+  uint32_t ip_start;
+  uint32_t ip_end;
   char *p_name;
   uint8_t action;
   struct fw_rule *next;
