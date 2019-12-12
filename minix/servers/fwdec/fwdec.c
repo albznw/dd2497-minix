@@ -17,7 +17,7 @@
 #include <sys/time.h> //System time
 
 /* Declare local functions. */
-static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr);
+static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr, const char *p_name);
 static void log(char* log_message);
 
 static fw_rule_t default_incoming_rule = {
@@ -75,7 +75,8 @@ int check_outgoing_ip4(uint32_t dest_ip) {
   };
 
   rules = &kth_rule;
-  fw_rule_t *matched_rule = find_matching_rule(rules, dest_ip);
+  // Change NULL to incoming pname
+  fw_rule_t *matched_rule = find_matching_rule(rules, dest_ip, NULL);
 
   if (matched_rule->action == FW_RULE_REJECT) {
     log("Packet dropped\n");
@@ -86,7 +87,7 @@ int check_outgoing_ip4(uint32_t dest_ip) {
   return LWIP_KEEP_PACKET; 
 }
 
-static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr)
+static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr, const char *p_name)
 {
   fw_rule_t *curr_rule = rules;
   fw_rule_t *chosen_rule = NULL;
@@ -105,6 +106,10 @@ static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr)
 
     if (curr_rule->ip_start == ip_addr && ip_addr == curr_rule->ip_end) {
       curr_flags |= FW_FLAG_EXACT_IP;
+    }
+
+    if (p_name != NULL && strcmp(p_name, curr_rule->p_name) == 0) {
+      curr_flags |= FW_FLAG_PNAME;
     }
 
     if (curr_flags > chosen_flags) {
