@@ -221,10 +221,17 @@ typedef struct {
 _ASSERT_MSG_SIZE(mess_fs_vfs_readwrite);
 
 typedef struct {
+	endpoint_t user_endp; /* User level endpoint */
+
 	uint32_t src_ip; /* Source IPv4 address */
 	uint32_t dest_ip; /* Destination IPv4 address */
 
-	uint8_t padding[48];
+	uint16_t src_port; /* Source Port*/
+	uint16_t dest_port;	/* Destination Port*/
+
+	uint64_t flags; /* Optional flags */
+	
+	uint8_t padding[32];
 } mess_fwdec_ip4;
 _ASSERT_MSG_SIZE(mess_fwdec_ip4);
 

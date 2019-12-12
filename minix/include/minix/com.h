@@ -1163,8 +1163,24 @@
 
 #define FWDEC_BASE 0X1C00
 
-#define FWDEC_QUERY_IP4_INC (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
-#define FWDEC_QUERY_IP4_OUT (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
+#define FWDEC_QUERY_IP4_INC  (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
+#define FWDEC_QUERY_IP4_OUT  (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
+#define FWDEC_QUERY_TCP_INC  (FWDEC_BASE + 2) /* Drop TCP packet or not (incoming) */
+#define FWDEC_QUERY_TCP_OUT  (FWDEC_BASE + 3) /* Drop TCP packet or not (outgoing) */
+#define FWDEC_QUERY_UDP_INC  (FWDEC_BASE + 4) /* Drop UDP packet or not (incoming) */
+#define FWDEC_QUERY_UDP_OUT  (FWDEC_BASE + 5) /* Drop UDP packet or not (outgoing) */
+#define FWDEC_QUERY_RAW_INC  (FWDEC_BASE + 6) /* Drop RAW packet or not (incoming) */
+#define FWDEC_QUERY_RAW_OUT  (FWDEC_BASE + 7) /* Drop RAW packet or not (outgoing) */
+#define FWDEC_QUERY_ICMP_INC (FWDEC_BASE + 8) /* Drop ICMP packet or not (incoming) */
+#define FWDEC_QUERY_ICMP_OUT (FWDEC_BASE + 9) /* Drop ICMP packet or not (outgoing) */
+
+/* Packet specific flags */
+#define FWDEC_SET_TCP_SYN(flags) (flags |= (1 << 0))
+#define FWDEC_GET_TCP_SYN(flags) (flags & (1 << 0))
+#define FWDEC_SET_TCP_ACK(flags) (flags |= (1 << 1))
+#define FWDEC_GET_TCP_ACK(flags) (flags & (1 << 1))
+#define FWDEC_SET_TCP_FIN(flags) (flags |= (1 << 2))
+#define FWDEC_GET_TCP_FIN(flags) (flags & (1 << 2))
 
 /*===========================================================================*
 *		Messages for the LWIP server		     *
@@ -1172,8 +1188,8 @@
 
 #define LWIP_BASE 0X1D00
 
-#define LWIP_KEEP_PACKET 	(FWDEC_BASE + 0)	/* Do not drop the packet */
-#define LWIP_DROP_PACKET 	(FWDEC_BASE + 1)	/* Drop the packet */
+#define LWIP_KEEP_PACKET 	(LWIP_BASE + 0)	/* Do not drop the packet */
+#define LWIP_DROP_PACKET 	(LWIP_BASE + 1)	/* Drop the packet */
 
 /*===========================================================================*
  *		Internal codes used by several services			     *
