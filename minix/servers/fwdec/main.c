@@ -55,6 +55,38 @@ int main(int argc, char **argv)
       case FWDEC_QUERY_IP4_OUT:
           result = check_outgoing_ip4(ip4_dest_ip);
           break;
+      case FWDEC_QUERY_TCP_INC:
+          // TODO add TCP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_TCP_OUT:
+          // TODO add TCP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_UDP_INC:
+          // TODO add UDP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_UDP_OUT:
+          // TODO add UDP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_RAW_INC:
+          // TODO add RAW functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_RAW_OUT:
+          // TODO add RAW functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_ICMP_INC:
+          // TODO add ICMP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
+      case FWDEC_QUERY_ICMP_OUT:
+          // TODO add ICMP functions and logic
+          result = check_outgoing_ip4(ip4_dest_ip);
+          break;
       default: 
           printf("fwdec: warning, got illegal request from %d\n", m.m_source);
           result = EINVAL;
