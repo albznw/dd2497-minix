@@ -46,6 +46,7 @@
  */
 
 #include "lwip/opt.h"
+#include "lwip/firewall.h"
 
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
@@ -60,6 +61,9 @@
 #include "lwip/inet_chksum.h"
 
 #include <string.h>
+
+/** Firewall syscall */
+#include <minix/fwdec.h>
 
 /** The list of RAW PCBs */
 static struct raw_pcb *raw_pcbs;
@@ -169,11 +173,13 @@ raw_input(struct pbuf *p, struct netif *inp)
         eaten = pcb->recv(pcb->recv_arg, pcb, p, ip_current_src_addr());
         if (eaten != 0) {
 
-          //TODO replace with hook to firewall
-          char src_addr[46], dest_addr[46];
-          ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
-          ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
-          printf("RAW packet going in. src: %s, dst: %s, endpoint: %d\n", src_addr, dest_addr, raw_get_user_endp(pcb));
+          // Make sure that firewall allows this packet
+          if(IP_IS_V4(ip_current_src_addr())){
+            if(raw_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), raw_get_user_endp(pcb)) 
+                != LWIP_KEEP_PACKET) {
+              break;
+            }
+          }
 
           /* receive function ate the packet */
           p = NULL;
@@ -401,11 +407,12 @@ raw_sendto_if_src(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
     return ERR_VAL;
   }
 
-  //TODO replace with hook to firewall
-  char src_addr[46], dest_addr[46];
-  ipaddr_ntoa_r(src_ip, src_addr, 46);
-  ipaddr_ntoa_r(dst_ip, dest_addr, 46);
-  printf("RAW packet going out. src: %s, dst: %s, endpoint: %d\n", src_addr, dest_addr, raw_get_user_endp(pcb));
+  // Make sure that firewall allows this packet
+  if(IP_IS_V4(dst_ip)){
+    if(raw_fw_outgoing(ip_2_ip4(src_ip), ip_2_ip4(dst_ip), raw_get_user_endp(pcb)) != LWIP_KEEP_PACKET) {
+      return ERR_OK;
+    }
+  }
 
   header_size = (
 #if LWIP_IPV4 && LWIP_IPV6

@@ -56,18 +56,18 @@ int udp_fw_outgoing(const ip4_addr_t *src, const ip4_addr_t *dest, int src_port,
   return LWIP_KEEP_PACKET;
 }
 
-int raw_fw_incoming(const ip4_addr_t *src, const ip4_addr_t *dest, int src_port, int dest_port, endpoint_t user_endp)
+int raw_fw_incoming(const ip4_addr_t *src, const ip4_addr_t *dest, endpoint_t user_endp)
 {
-  if (fwdec_query_packet(FWDEC_QUERY_RAW_INC, src->addr, dest->addr, user_endp, src_port, dest_port, 0) != LWIP_KEEP_PACKET) {
+  if (fwdec_query_packet(FWDEC_QUERY_RAW_INC, src->addr, dest->addr, user_endp, 0, 0, 0) != LWIP_KEEP_PACKET) {
     return LWIP_DROP_PACKET;
   }
 
   return LWIP_KEEP_PACKET;
 }
 
-int raw_fw_outgoing(const ip4_addr_t *src, const ip4_addr_t *dest, int src_port, int dest_port, endpoint_t user_endp)
+int raw_fw_outgoing(const ip4_addr_t *src, const ip4_addr_t *dest, endpoint_t user_endp)
 {
-  if (fwdec_query_packet(FWDEC_QUERY_RAW_OUT, src->addr, dest->addr, user_endp, src_port, dest_port, 0) != LWIP_KEEP_PACKET) {
+  if (fwdec_query_packet(FWDEC_QUERY_RAW_OUT, src->addr, dest->addr, user_endp, 0, 0, 0) != LWIP_KEEP_PACKET) {
     return LWIP_DROP_PACKET;
   }
 
