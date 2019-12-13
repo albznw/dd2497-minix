@@ -19,27 +19,6 @@ static uint16_t src_port;
 static uint16_t dest_port;
 static uint64_t flags;
 
-
-/* TODO remove this since its only needed for the DEMO */
-static char* src_ip_string = "255.255.255.255";
-static char* dest_ip_string = "255.255.255.255";
-
-/* TODO remove this since its only needed for the DEMO */
-void set_ip_strings(unsigned int src, unsigned int dest)
-{
-    unsigned char bytes[4];
-    bytes[0] = src & 0xFF;
-    bytes[1] = (src >> 8) & 0xFF;
-    bytes[2] = (src >> 16) & 0xFF;
-    bytes[3] = (src >> 24) & 0xFF;
-    snprintf(src_ip_string, 16 ,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
-    bytes[0] = dest & 0xFF;
-    bytes[1] = (dest >> 8) & 0xFF;
-    bytes[2] = (dest >> 16) & 0xFF;
-    bytes[3] = (dest >> 24) & 0xFF;
-    snprintf(dest_ip_string, 16 ,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
-}
-
 /* Declare local functions. */
 static void get_work(message *m_ptr);
 static void reply(endpoint_t whom, message *m_ptr);
@@ -75,6 +54,20 @@ int main(int argc, char **argv)
           result = EINVAL;
           goto send_reply;
       }
+
+      /* TODO remove SHIT this since its only needed for the DEMO */
+      unsigned char src_bytes[4];
+      src_bytes[0] = src_ip & 0xFF;
+      src_bytes[1] = (src_ip >> 8) & 0xFF;
+      src_bytes[2] = (src_ip >> 16) & 0xFF;
+      src_bytes[3] = (src_ip >> 24) & 0xFF;
+
+      unsigned char dest_bytes[4];
+      dest_bytes[0] = dest_ip & 0xFF;
+      dest_bytes[1] = (dest_ip >> 8) & 0xFF;
+      dest_bytes[2] = (dest_ip >> 16) & 0xFF;
+      dest_bytes[3] = (dest_ip >> 24) & 0xFF;
+
       switch (callnr) {
       case FWDEC_QUERY_IP4_INC:
           result = check_incoming_ip4(src_ip);
@@ -84,42 +77,42 @@ int main(int argc, char **argv)
           break;
       case FWDEC_QUERY_TCP_INC:
           // TODO add TCP functions and logic
-          printf("TCP IN %s:%d <- %s:%d (%s)\n", dest_ip_string, dest_port, src_ip_string, src_port, proc_name);
+          printf("TCP IN %d.%d.%d.%d:%d <- %d.%d.%d.%d:%d (%s)\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_TCP_OUT:
           // TODO add TCP functions and logic
-          printf("TCP OUT %s:%d -> %s:%d (%s)\n", src_ip_string, src_port, dest_ip_string, dest_port, proc_name);
+          printf("TCP OUT %d.%d.%d.%d:%d -> %d.%d.%d.%d:%d (%s)\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_UDP_INC:
           // TODO add UDP functions and logic
-          printf("UDP IN %s:%d <- %s:%d (%s)\n", dest_ip_string, dest_port, src_ip_string, src_port, proc_name);
+          printf("UDP IN %d.%d.%d.%d:%d <- %d.%d.%d.%d:%d (%s)\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_UDP_OUT:
           // TODO add UDP functions and logic
-          printf("UDP OUT %s:%d -> %s:%d (%s)\n", src_ip_string, src_port, dest_ip_string, dest_port, proc_name);
+          printf("UDP OUT %d.%d.%d.%d:%d -> %d.%d.%d.%d:%d (%s)\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_RAW_INC:
           // TODO add RAW functions and logic
-          printf("RAW IN %s <- %s (%s)\n", dest_ip_string, src_ip_string, proc_name);
+          printf("RAW IN %d.%d.%d.%d <- %d.%d.%d.%d (%s)\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_RAW_OUT:
           // TODO add RAW functions and logic
-          printf("RAW OUT %s -> %s (%s)\n", src_ip_string, dest_ip_string, proc_name);
+          printf("RAW OUT %d.%d.%d.%d -> %d.%d.%d.%d (%s)\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], proc_name);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_ICMP_INC:
           // TODO add ICMP functions and logic
-          printf("ICMP IN %s <- %s\n", dest_ip_string, src_ip_string);
+          printf("ICMP IN %d.%d.%d.%d <- %d.%d.%d.%d\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3]);
           result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_ICMP_OUT:
           // TODO add ICMP functions and logic
-          printf("ICMP OUT %s -> %s\n", src_ip_string, dest_ip_string);
+          printf("ICMP OUT %d.%d.%d.%d -> %d.%d.%d.%d\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3]);
           result = check_outgoing_ip4(dest_ip);
           break;
       default: 
@@ -168,7 +161,6 @@ static void get_work(
     }
     src_ip = m_ptr->m_fwdec_ip4.src_ip;
     dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
-    set_ip_strings(src_ip, dest_ip); // TODO Remove after DEMO
     src_port = m_ptr->m_fwdec_ip4.src_port;
     dest_port = m_ptr->m_fwdec_ip4.dest_port;
     flags = m_ptr->m_fwdec_ip4.flags;
