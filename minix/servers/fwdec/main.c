@@ -10,8 +10,35 @@
 /* Allocate space for the global variables. */
 static endpoint_t who_e;	/* caller's proc number */
 static int callnr;		/* system call number */
-static uint32_t ip4_src_ip;
-static uint32_t ip4_dest_ip;
+
+/* Message parameters */
+static char proc_name[16];
+static uint32_t src_ip;
+static uint32_t dest_ip;
+static uint16_t src_port;
+static uint16_t dest_port;
+static uint64_t flags;
+
+
+/* TODO remove this since its only needed for the DEMO */
+static char* src_ip_string = "255.255.255.255";
+static char* dest_ip_string = "255.255.255.255";
+
+/* TODO remove this since its only needed for the DEMO */
+void set_ip_strings(unsigned int src, unsigned int dest)
+{
+    unsigned char bytes[4];
+    bytes[0] = src & 0xFF;
+    bytes[1] = (src >> 8) & 0xFF;
+    bytes[2] = (src >> 16) & 0xFF;
+    bytes[3] = (src >> 24) & 0xFF;
+    snprintf(src_ip_string, 16 ,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
+    bytes[0] = dest & 0xFF;
+    bytes[1] = (dest >> 8) & 0xFF;
+    bytes[2] = (dest >> 16) & 0xFF;
+    bytes[3] = (dest >> 24) & 0xFF;
+    snprintf(dest_ip_string, 16 ,"%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
+}
 
 /* Declare local functions. */
 static void get_work(message *m_ptr);
@@ -50,42 +77,50 @@ int main(int argc, char **argv)
       }
       switch (callnr) {
       case FWDEC_QUERY_IP4_INC:
-          result = check_incoming_ip4(ip4_src_ip);
+          result = check_incoming_ip4(src_ip);
           break;
       case FWDEC_QUERY_IP4_OUT:
-          result = check_outgoing_ip4(ip4_dest_ip);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_TCP_INC:
           // TODO add TCP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("TCP IN %s:%d <- %s:%d (%s)\n", dest_ip_string, dest_port, src_ip_string, src_port, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_TCP_OUT:
           // TODO add TCP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("TCP OUT %s:%d -> %s:%d (%s)\n", src_ip_string, src_port, dest_ip_string, dest_port, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_UDP_INC:
           // TODO add UDP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("UDP IN %s:%d <- %s:%d (%s)\n", dest_ip_string, dest_port, src_ip_string, src_port, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_UDP_OUT:
           // TODO add UDP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("UDP OUT %s:%d -> %s:%d (%s)\n", src_ip_string, src_port, dest_ip_string, dest_port, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_RAW_INC:
           // TODO add RAW functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("RAW IN %s <- %s (%s)\n", dest_ip_string, src_ip_string, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_RAW_OUT:
           // TODO add RAW functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("RAW OUT %s -> %s (%s)\n", src_ip_string, dest_ip_string, proc_name);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_ICMP_INC:
           // TODO add ICMP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("ICMP IN %s <- %s\n", dest_ip_string, src_ip_string);
+          result = check_outgoing_ip4(dest_ip);
           break;
       case FWDEC_QUERY_ICMP_OUT:
           // TODO add ICMP functions and logic
-          result = check_outgoing_ip4(ip4_dest_ip);
+          printf("ICMP OUT %s -> %s\n", src_ip_string, dest_ip_string);
+          result = check_outgoing_ip4(dest_ip);
           break;
       default: 
           printf("fwdec: warning, got illegal request from %d\n", m.m_source);
@@ -128,8 +163,15 @@ static void get_work(
         panic("failed to receive message!: %d", status);
     who_e = m_ptr->m_source;        /* message arrived! set sender */
     callnr = m_ptr->m_type;       /* set function call number */
-    ip4_src_ip = m_ptr->m_fwdec_ip4.src_ip;
-    ip4_dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
+    if(m_ptr->m_fwdec_ip4.user_endp) {
+        getepname(m_ptr->m_fwdec_ip4.user_endp, proc_name, 16);
+    }
+    src_ip = m_ptr->m_fwdec_ip4.src_ip;
+    dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
+    set_ip_strings(src_ip, dest_ip); // TODO Remove after DEMO
+    src_port = m_ptr->m_fwdec_ip4.src_port;
+    dest_port = m_ptr->m_fwdec_ip4.dest_port;
+    flags = m_ptr->m_fwdec_ip4.flags;
 }
 
 /*===========================================================================*
