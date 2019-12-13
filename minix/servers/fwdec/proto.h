@@ -10,7 +10,7 @@ int main(int argc, char **argv);
 
 /* fwdec.c */
 int check_incoming_ip4(uint32_t src_ip);
-int check_outgoing_ip4(uint32_t dest_ip);
+int check_outgoing_ip4(uint32_t dest_ip, const char *p_name);
 
 // int check_ip4_headers(bool incoming, uint32_t src_ip, uint32_t dst_ip);
 // int check_ip4_headers(uint32_t src_ip, uint32_t dst_ip);

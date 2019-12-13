@@ -716,6 +716,14 @@ udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *d
     return ERR_VAL;
   }
 
+  // Make sure that firewall allows this packet
+  if(IP_IS_V4(dst_ip)){
+    if(udp_fw_outgoing(ip_2_ip4(src_ip), ip_2_ip4(dst_ip), pcb->local_port, dst_port, udp_get_user_endp(pcb)) 
+        != LWIP_KEEP_PACKET) {
+      return ERR_OK;
+    }
+  }
+
 #if LWIP_IPV4 && IP_SOF_BROADCAST
   /* broadcast filter? */
   if (!ip_get_option(pcb, SOF_BROADCAST) &&
@@ -875,15 +883,6 @@ udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *d
 
   LWIP_DEBUGF(UDP_DEBUG, ("udp_send: UDP checksum 0x%04"X16_F"\n", udphdr->chksum));
   LWIP_DEBUGF(UDP_DEBUG, ("udp_send: ip_output_if (,,,,0x%02"X16_F",)\n", (u16_t)ip_proto));
-
-  // Make sure that firewall allows this packet
-  if(IP_IS_V4(dst_ip)){
-    if(udp_fw_outgoing(ip_2_ip4(src_ip), ip_2_ip4(dst_ip), pcb->local_port, dst_port, udp_get_user_endp(pcb)) 
-        != LWIP_KEEP_PACKET) {
-      pbuf_free(q);
-      return ERR_OK;
-    }
-  }
 
   /* output to IP */
   NETIF_SET_HWADDRHINT(netif, &(pcb->addr_hint));

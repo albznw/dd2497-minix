@@ -62,7 +62,7 @@ int check_incoming_ip4(uint32_t src_ip) {
   return LWIP_KEEP_PACKET;
 }
 
-int check_outgoing_ip4(uint32_t dest_ip) {
+int check_outgoing_ip4(uint32_t dest_ip, const char *p_name) {
   fw_rule_t *rules = &default_outgoing_rule;
   uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
 
