@@ -31,14 +31,4 @@
 #define FW_FLAG_EXACT_IP    0x4
 #define FW_FLAG_PNAME       0x8
 
-struct fw_rule {
-  uint32_t ip_start;
-  uint32_t ip_end;
-  char *p_name;
-  uint8_t action;
-  struct fw_rule *next;
-};
-
-typedef struct fw_rule fw_rule_t;
-
 #endif // _FWDEC_H_
