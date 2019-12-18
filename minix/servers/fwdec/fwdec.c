@@ -47,10 +47,14 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
   // Push default rules
   push_rule(&out_rules, IP_ANY, IP_ANY, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
   push_rule(&in_rules, IP_ANY, IP_ANY, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
-
+  
   // Push custom hard-coded rules
   uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
   uint32_t google_dns = ip4_from_parts(8, 8, 8, 8);
+  uint32_t local_host = ip4_from_parts(127, 0, 0, 1);
+  push_rule(&in_rules, google_dns, google_dns, MAX_PRIORITY, FW_RULE_REJECT, "dig");
+  push_rule(&in_rules, local_host, local_host, MAX_PRIORITY, FW_RULE_REJECT, "telnet");
+
   push_rule(&out_rules, kth_ip, kth_ip, MAX_PRIORITY, FW_RULE_REJECT, NULL);
   push_rule(&out_rules, google_dns, google_dns, MAX_PRIORITY, FW_RULE_ACCEPT, "dig");
   push_rule(&out_rules, IP_ANY, IP_ANY, MED_PRIORITY, FW_RULE_REJECT, "dig");
@@ -63,11 +67,20 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
  *				do_publish				                                     *
  *===========================================================================*/
 
-int check_incoming_ip4(uint32_t src_ip) {
-  return LWIP_KEEP_PACKET;
+int check_incoming_ip4(const uint32_t src_ip, const char *p_name) {
+  // Change NULL to incoming pname
+  fw_rule *matched_rule = find_matching_rule(&in_rules, src_ip, p_name);
+
+  if (matched_rule->action == FW_RULE_REJECT) {
+    log("Packet dropped\n");
+    return LWIP_DROP_PACKET;
+  }
+
+  log("Packet accepted\n");
+  return LWIP_KEEP_PACKET; 
 }
 
-int check_outgoing_ip4(uint32_t dest_ip, const char *p_name) {
+int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
   // Change NULL to incoming pname
   fw_rule *matched_rule = find_matching_rule(&out_rules, dest_ip, p_name);
 
@@ -86,14 +99,14 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
 
   switch (type) {
     case FWDEC_QUERY_IP4_INC:
-      result = check_incoming_ip4(src_ip);
+      result = check_incoming_ip4(src_ip, NULL);
       break;
     case FWDEC_QUERY_IP4_OUT:
       result = check_outgoing_ip4(dest_ip, NULL);
       break;
     case FWDEC_QUERY_TCP_INC:
       // TODO add TCP functions and logic
-      result = check_incoming_ip4(dest_ip);
+      result = check_incoming_ip4(src_ip, p_name);
       break;
     case FWDEC_QUERY_TCP_OUT:
       // TODO add TCP functions and logic
@@ -101,7 +114,7 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
       break;
     case FWDEC_QUERY_UDP_INC:
       // TODO add UDP functions and logic
-      result = check_incoming_ip4(dest_ip);
+      result = check_incoming_ip4(src_ip, p_name);
       break;
     case FWDEC_QUERY_UDP_OUT:
       // TODO add UDP functions and logic
@@ -109,7 +122,7 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
       break;
     case FWDEC_QUERY_RAW_INC:
       // TODO add RAW functions and logic
-      result = check_incoming_ip4(dest_ip);
+      result = check_incoming_ip4(src_ip, p_name);
       break;
     case FWDEC_QUERY_RAW_OUT:
       // TODO add RAW functions and logic
@@ -117,7 +130,7 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
       break;
     case FWDEC_QUERY_ICMP_INC:
       // TODO add ICMP functions and logic
-      result = check_incoming_ip4(dest_ip);
+      result = check_incoming_ip4(src_ip, NULL);
       break;
     case FWDEC_QUERY_ICMP_OUT:
       // TODO add ICMP functions and logic
