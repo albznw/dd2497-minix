@@ -109,14 +109,16 @@ static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr, const c
       curr_flags |= FW_FLAG_EXACT_IP;
     }
 
-    bool curr_name_match = p_name != NULL && strcmp(p_name, curr_rule->p_name) == 0;
-    bool better_new_name = !name_match && curr_name_match && curr_flags > 0;
-    bool better_same_name = name_match == curr_name_match && curr_flags > chosen_flags;
-
-    if (better_new_name || better_same_name) {
+    if (p_name == NULL && !name_match && curr_flags > chosen_flags) {
       chosen_rule = curr_rule;
       chosen_flags = curr_flags;
-      name_match = curr_name_match;
+    } else if (p_name != NULL && strcmp(p_name, curr_rule->p_name) == 0 && !name_match && curr_flags > 0) {
+      chosen_rule = curr_rule;
+      chosen_flags = curr_flags;
+      name_match = true;
+    } else if (p_name != NULL && strcmp(p_name, curr_rule->p_name) == 0 && name_match && curr_flags > chosen_flags) {
+      chosen_rule = curr_rule;
+      chosen_flags = curr_flags;
     }
     
     curr_rule = curr_rule->next;
