@@ -13,27 +13,27 @@
 #define MAX_NAME_LEN 16
 
 /**
- * Let IPRules be a doubly linked list that exists on the HEAP.
+ * Let fw_rules be a doubly linked list that exists on the HEAP.
  */
-typedef struct IPRule {
+typedef struct fw_rule {
     uint8_t priority;
     uint8_t action;
     uint32_t ip_start;
     uint32_t ip_end;
     char p_name[MAX_NAME_LEN];
-    struct IPRule* next;
-    struct IPRule* prev;
-} IPRule;
+    struct fw_rule* next;
+    struct fw_rule* prev;
+} fw_rule;
 
 /**
  * Find first matching rule with highest priority.
  */
-IPRule *find_matching_rule(IPRule** head_ref, const uint32_t ip_addr, const char *p_name) {
+fw_rule *find_matching_rule(fw_rule** head_ref, const uint32_t ip_addr, const char *p_name) {
 
     uint8_t highest_prio = MIN_PRIORITY;
-    IPRule *chosen_rule = NULL;
+    fw_rule *chosen_rule = NULL;
 
-    IPRule *curr_rule = (*head_ref);
+    fw_rule *curr_rule = (*head_ref);
 
     while (curr_rule != NULL){
         if ((curr_rule->ip_start == 0 && curr_rule->ip_end == 0)
@@ -65,10 +65,10 @@ IPRule *find_matching_rule(IPRule** head_ref, const uint32_t ip_addr, const char
 /**
  * Push a rule to the start of the chain.
  */
-void push_rule(IPRule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
+void push_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
                   const uint8_t action, const char* p_name) {
 
-    IPRule* new_node = (struct IPRule*)malloc(sizeof(struct IPRule));
+    fw_rule* new_node = (struct fw_rule*)malloc(sizeof(struct fw_rule));
 
     new_node->priority = priority;
     new_node->ip_start = ip_start;
@@ -92,10 +92,10 @@ void push_rule(IPRule** head_ref, const uint32_t ip_start, const uint32_t ip_end
 /**
  * Remove the first rule that matches
  */
-void remove_rule(IPRule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
+void remove_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
                     const uint8_t action, const char* p_name) {
 
-    IPRule *curr_rule = (*head_ref);
+    fw_rule *curr_rule = (*head_ref);
     while (curr_rule != NULL){
         if (curr_rule->ip_start == ip_start && curr_rule->ip_end == ip_end && curr_rule->action == action) {
             if(p_name != NULL){

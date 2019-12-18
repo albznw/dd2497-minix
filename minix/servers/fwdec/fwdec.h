@@ -8,7 +8,7 @@
 #include <minix/param.h>
 #include <regex.h>
 
-#define FWDEC_DEBUG 0//Set to 1 to enable additional info on stdout, 0 to disable
+#define FWDEC_DEBUG //Uncomment this line to enable debug output
 
 #define MODE_NOTSET 0
 #define MODE_WHITELIST 1

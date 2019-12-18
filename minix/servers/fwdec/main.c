@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   sef_local_startup();
 
   /* Main loop - get work and do it, forever. */         
-  while (TRUE) {              
+  while (TRUE) { 
 
       /* Wait for incoming message, sets 'callnr' and 'who'. */
       get_work(&m);
@@ -55,70 +55,7 @@ int main(int argc, char **argv)
           goto send_reply;
       }
 
-      /* TODO remove SHIT this since its only needed for the DEMO */
-      unsigned char src_bytes[4];
-      src_bytes[0] = src_ip & 0xFF;
-      src_bytes[1] = (src_ip >> 8) & 0xFF;
-      src_bytes[2] = (src_ip >> 16) & 0xFF;
-      src_bytes[3] = (src_ip >> 24) & 0xFF;
-
-      unsigned char dest_bytes[4];
-      dest_bytes[0] = dest_ip & 0xFF;
-      dest_bytes[1] = (dest_ip >> 8) & 0xFF;
-      dest_bytes[2] = (dest_ip >> 16) & 0xFF;
-      dest_bytes[3] = (dest_ip >> 24) & 0xFF;
-
-      switch (callnr) {
-      case FWDEC_QUERY_IP4_INC:
-          result = check_incoming_ip4(src_ip);
-          break;
-      case FWDEC_QUERY_IP4_OUT:
-          result = check_outgoing_ip4(dest_ip, NULL);
-          break;
-      case FWDEC_QUERY_TCP_INC:
-          // TODO add TCP functions and logic
-          result = check_incoming_ip4(dest_ip);
-          printf("TCP IN %d.%d.%d.%d:%d <- %d.%d.%d.%d:%d (%s) %s\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, proc_name, (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_TCP_OUT:
-          // TODO add TCP functions and logic
-          result = check_outgoing_ip4(dest_ip, proc_name);
-          printf("TCP OUT %d.%d.%d.%d:%d -> %d.%d.%d.%d:%d (%s) %s\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, proc_name, (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_UDP_INC:
-          // TODO add UDP functions and logic
-          result = check_incoming_ip4(dest_ip);
-          printf("UDP IN %d.%d.%d.%d:%d <- %d.%d.%d.%d:%d (%s) %s\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, proc_name, (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_UDP_OUT:
-          // TODO add UDP functions and logic
-          result = check_outgoing_ip4(dest_ip, proc_name);
-          printf("UDP OUT %d.%d.%d.%d:%d -> %d.%d.%d.%d:%d (%s) %s\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], src_port, dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], dest_port, proc_name, (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_RAW_INC:
-          // TODO add RAW functions and logic
-          result = check_incoming_ip4(dest_ip);
-          printf("RAW IN %d.%d.%d.%d <- %d.%d.%d.%d (%s) %s\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], proc_name, (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_RAW_OUT:
-          // TODO add RAW functions and logic
-          result = check_outgoing_ip4(dest_ip, proc_name);
-          printf("RAW OUT %d.%d.%d.%d -> %d.%d.%d.%d (%s) %s\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], proc_name, (result == LWIP_DROP_PACKET ?  "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_ICMP_INC:
-          // TODO add ICMP functions and logic
-          result = check_incoming_ip4(dest_ip);
-          printf("ICMP IN %d.%d.%d.%d <- %d.%d.%d.%d %s\n", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      case FWDEC_QUERY_ICMP_OUT:
-          // TODO add ICMP functions and logic
-          result = check_outgoing_ip4(dest_ip, NULL);
-          printf("ICMP OUT %d.%d.%d.%d -> %d.%d.%d.%d %s\n", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3], dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3], (result == LWIP_DROP_PACKET ? "BLOCKED" : "ALLOWED"));
-          break;
-      default: 
-          printf("fwdec: warning, got illegal request from %d\n", m.m_source);
-          result = EINVAL;
-      }
+    result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags);
 
 send_reply:
       memset(&m,0, sizeof(m));
