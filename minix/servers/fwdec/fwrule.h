@@ -20,6 +20,7 @@ typedef struct fw_rule {
     uint8_t action;
     uint32_t ip_start;
     uint32_t ip_end;
+    uint16_t port;
     char p_name[MAX_NAME_LEN];
     struct fw_rule* next;
     struct fw_rule* prev;
@@ -62,6 +63,37 @@ fw_rule *find_matching_rule(fw_rule** head_ref, const uint32_t ip_addr, const ch
     return chosen_rule;
 }
 
+void get_ip_string(char* buf, uint32_t buf_len, uint32_t ip_addr){
+    unsigned char bytes[4] = {ip_addr & 0xFF, (ip_addr >> 8) & 0xFF, (ip_addr >> 16) & 0xFF, (ip_addr >> 24) & 0xFF};
+    snprintf(buf, buf_len, "%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
+}
+
+/**
+ * Print the named chain of rules.
+ */
+void print_rules(fw_rule** head_ref, const char* chain) {
+    printf("Chain %s\n", chain);
+    printf("%-10s%-10s%-16s%-16s%-6s%-18s\n", "action", "priority", "start", "end", "port", "name");
+    fw_rule *curr_rule = (*head_ref);
+    while (curr_rule != NULL){
+        char action[7];
+        char start_ip_str[64];
+        char end_ip_str[64];
+        get_ip_string(start_ip_str, 64, curr_rule->ip_start);
+        get_ip_string(end_ip_str, 64, curr_rule->ip_end);
+        if(curr_rule->action == 1){
+            strncpy(action, "REJECT", 7);
+        } else {
+            strncpy(action, "ACCEPT", 7);
+        }
+        printf("%-10s%-10d%-16s%-16s%-6d%-18s\n", action, curr_rule->priority, start_ip_str, end_ip_str,
+                curr_rule->port, curr_rule->p_name);
+        curr_rule = curr_rule->next;
+    }
+    printf("\n");
+    return;
+}
+
 /**
  * Push a rule to the start of the chain.
  */
@@ -98,8 +130,8 @@ void remove_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_
     fw_rule *curr_rule = (*head_ref);
     while (curr_rule != NULL){
         if (curr_rule->ip_start == ip_start && curr_rule->ip_end == ip_end && curr_rule->action == action) {
-            if(p_name != NULL){
-                if(strncmp(curr_rule->p_name, p_name, MAX_NAME_LEN) == 0){
+            if(curr_rule->p_name[0] != '\0'){
+                if(p_name != NULL && strncmp(curr_rule->p_name, p_name, MAX_NAME_LEN) == 0){
                     break;
                 }
             } else {
@@ -112,11 +144,16 @@ void remove_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_
     if(curr_rule != NULL) {
         if(curr_rule->prev != NULL){
             curr_rule->prev->next = curr_rule->next;
+        } else {
+            // Rule was the first of the list. Need to update head.
+            (*head_ref) = curr_rule->next;
         }
         if(curr_rule->next != NULL){
             curr_rule->next->prev = curr_rule->prev;
         }
         free(curr_rule);
+    } else {
+        printf("Did not find a matching rule to delete\n");
     }
     return;
 }
