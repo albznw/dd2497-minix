@@ -1174,6 +1174,10 @@
 #define FWDEC_QUERY_ICMP_INC (FWDEC_BASE + 8) /* Drop ICMP packet or not (incoming) */
 #define FWDEC_QUERY_ICMP_OUT (FWDEC_BASE + 9) /* Drop ICMP packet or not (outgoing) */
 
+#define FWDEC_ADD_RULE (FWDEC_BASE + 10) /* Add firewall rule */
+#define FWDEC_DEL_RULE (FWDEC_BASE + 11) /* Delete firewall rule */
+#define FWDEC_LIST_RULES (FWDEC_BASE + 12) /* List all firewall rules */
+
 /* Packet specific flags */
 #define FWDEC_SET_TCP_SYN(flags) (flags |= (1 << 0))
 #define FWDEC_GET_TCP_SYN(flags) (flags & (1 << 0))

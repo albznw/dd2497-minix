@@ -128,6 +128,7 @@ void pm_setsid(endpoint_t proc_e);
 int do_sync(void);
 int do_fsync(void);
 void pm_reboot(void);
+int do_fwctl(void);
 int do_svrctl(void);
 int do_getsysinfo(void);
 int do_vm_call(void);
