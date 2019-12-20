@@ -54,8 +54,33 @@ int main(int argc, char **argv)
           result = EINVAL;
           goto send_reply;
       }
-
-    result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags);
+    
+    switch (callnr)
+    {
+    case FWDEC_ADD_RULE:
+      result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
+				                m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+      break;
+    case FWDEC_DEL_RULE:
+      result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
+				                    m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+      break;
+    case FWDEC_LIST_RULES:
+      list_rules();
+      result = OK;
+      break;
+    default:
+      if(m.m_fwdec_ip4.user_endp) {
+        getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);
+      }
+      src_ip = m.m_fwdec_ip4.src_ip;
+      dest_ip = m.m_fwdec_ip4.dest_ip;
+      src_port = m.m_fwdec_ip4.src_port;
+      dest_port = m.m_fwdec_ip4.dest_port;
+      flags = m.m_fwdec_ip4.flags;
+      result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags);
+      break;
+    }
 
 send_reply:
       memset(&m,0, sizeof(m));
@@ -93,14 +118,6 @@ static void get_work(
         panic("failed to receive message!: %d", status);
     who_e = m_ptr->m_source;        /* message arrived! set sender */
     callnr = m_ptr->m_type;       /* set function call number */
-    if(m_ptr->m_fwdec_ip4.user_endp) {
-        getepname(m_ptr->m_fwdec_ip4.user_endp, proc_name, 16);
-    }
-    src_ip = m_ptr->m_fwdec_ip4.src_ip;
-    dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
-    src_port = m_ptr->m_fwdec_ip4.src_port;
-    dest_port = m_ptr->m_fwdec_ip4.dest_port;
-    flags = m_ptr->m_fwdec_ip4.flags;
 }
 
 /*===========================================================================*

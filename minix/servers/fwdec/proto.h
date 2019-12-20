@@ -15,6 +15,12 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
 int check_incoming_ip4(const uint32_t src_ip, const char *p_name);
 int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name);
 
+int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+				uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
+int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+					uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
+
+void list_rules(void);
 int sef_cb_init_fresh(int type, sef_init_info_t *info);
 
 #endif

@@ -93,6 +93,40 @@ int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
   return LWIP_KEEP_PACKET; 
 }
 
+int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+				uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+  printf("fwdec: adding rule\n");
+  switch (direction) {
+  case 0:
+    push_rule(&in_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    break; 
+  default:
+    push_rule(&out_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    break;
+  }
+  return 0;
+}
+
+void list_rules(void) {
+  print_rules(&in_rules, "INC");
+  print_rules(&out_rules, "OUT");
+  return;
+}
+
+int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+					uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+  printf("fwdec: removing rule\n");
+  switch (direction) {
+  case 0:
+    remove_rule(&in_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    break; 
+  default:
+    remove_rule(&out_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    break;
+  }
+  return 0;
+}
+
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                   const uint16_t src_port, const uint16_t dest_port, const char* p_name, const uint64_t flags) {
   int result;
@@ -136,8 +170,8 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
       // TODO add ICMP functions and logic
       result = check_outgoing_ip4(dest_ip, NULL);
       break;
-    default: 
-      printf("fwdec: warning, got illegal request\n");
+    default:
+      printf("fwdec: warning, got illegal request %d\n", type);
       result = EINVAL;
   }
 
