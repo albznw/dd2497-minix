@@ -29,7 +29,6 @@
 #define FW_FLAG_ANY_IP      0x1
 #define FW_FLAG_IP_IN_RANGE 0x2
 #define FW_FLAG_EXACT_IP    0x4
-#define FW_FLAG_PNAME       0x8
 
 
 
