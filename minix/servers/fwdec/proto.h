@@ -11,6 +11,8 @@ int main(int argc, char **argv);
 /* fwdec.c */
 int check_incoming_ip4(uint32_t src_ip);
 int check_outgoing_ip4(uint32_t dest_ip);
+int add_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action);
+int remove_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action);
 
 // int check_ip4_headers(bool incoming, uint32_t src_ip, uint32_t dst_ip);
 // int check_ip4_headers(uint32_t src_ip, uint32_t dst_ip);

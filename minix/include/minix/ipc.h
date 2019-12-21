@@ -229,6 +229,15 @@ typedef struct {
 _ASSERT_MSG_SIZE(mess_fwdec_ip4);
 
 typedef struct {
+	uint32_t src_ip; /* Source IPv4 address */
+	uint32_t dest_ip; /* Destination IPv4 address */
+	char p_name[16];
+	uint8_t action;
+	uint8_t padding[31];
+} mess_fwdec_rule_message;
+_ASSERT_MSG_SIZE(mess_fwdec_rule_message);
+
+typedef struct {
 	uint8_t padding[56];
 } mess_i2c_li2cdriver_busc_i2c_exec;
 _ASSERT_MSG_SIZE(mess_i2c_li2cdriver_busc_i2c_exec);
@@ -2452,6 +2461,7 @@ typedef struct noxfer_message {
 		mess_fs_vfs_readsuper	m_fs_vfs_readsuper;
 		mess_fs_vfs_readwrite	m_fs_vfs_readwrite;
 		mess_fwdec_ip4 m_fwdec_ip4;
+		mess_fwdec_rule_message m_fwdec_rule_message;
 		mess_i2c_li2cdriver_busc_i2c_exec m_i2c_li2cdriver_busc_i2c_exec;
 		mess_i2c_li2cdriver_busc_i2c_reserve m_i2c_li2cdriver_busc_i2c_reserve;
 		mess_input_linputdriver_input_conf m_input_linputdriver_input_conf;
