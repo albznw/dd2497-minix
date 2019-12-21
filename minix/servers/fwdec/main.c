@@ -12,6 +12,8 @@ static endpoint_t who_e;	/* caller's proc number */
 static int callnr;		/* system call number */
 static uint32_t ip4_src_ip;
 static uint32_t ip4_dest_ip;
+static char p_name[16];
+static uint8_t action;
 
 /* Declare local functions. */
 static void get_work(message *m_ptr);
@@ -25,20 +27,20 @@ static void sef_local_startup(void);
  *===========================================================================*/
 int main(int argc, char **argv)
 {
-/* This is the main routine of this service. The main loop consists of 
+/* This is the main routine of this service. The main loop consists of
  * three major activities: getting new work, processing the work, and
  * sending the reply. The loop never terminates, unless a panic occurs.
  */
-  
+
   message m;
-  int result;                 
+  int result;
 
   /* SEF local startup. */
   env_setargs(argc, argv);
   sef_local_startup();
 
-  /* Main loop - get work and do it, forever. */         
-  while (TRUE) {              
+  /* Main loop - get work and do it, forever. */
+  while (TRUE) {
 
       /* Wait for incoming message, sets 'callnr' and 'who'. */
       get_work(&m);
@@ -55,7 +57,13 @@ int main(int argc, char **argv)
       case FWDEC_QUERY_IP4_OUT:
           result = check_outgoing_ip4(ip4_dest_ip);
           break;
-      default: 
+      case FWDEC_ADD_RULE:
+          result = add_rule(ip4_src_ip,ip4_dest_ip,p_name,action);
+          break;
+      case FWDEC_REMOVE_RULE:
+          result = remove_rule(ip4_src_ip,ip4_dest_ip,p_name,action);
+          break;
+      default:
           printf("fwdec: warning, got illegal request from %d\n", m.m_source);
           result = EINVAL;
       }
@@ -96,8 +104,16 @@ static void get_work(
         panic("failed to receive message!: %d", status);
     who_e = m_ptr->m_source;        /* message arrived! set sender */
     callnr = m_ptr->m_type;       /* set function call number */
-    ip4_src_ip = m_ptr->m_fwdec_ip4.src_ip;
-    ip4_dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
+    if(callnr==FWDEC_QUERY_IP4_INC||callnr==FWDEC_QUERY_IP4_OUT){
+      ip4_src_ip = m_ptr->m_fwdec_ip4.src_ip;
+      ip4_dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
+    }
+    if(callnr==FWDEC_ADD_RULE||callnr==FWDEC_REMOVE_RULE){
+      ip4_src_ip = m_ptr->m_fwdec_rule_message.src_ip;
+      ip4_dest_ip = m_ptr->m_fwdec_rule_message.dest_ip;
+      strcpy(p_name,m_ptr->m_fwdec_rule_message.p_name);
+      action = m_ptr->m_fwdec_rule_message.action;
+    }
 }
 
 /*===========================================================================*

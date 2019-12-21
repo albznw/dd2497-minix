@@ -31,6 +31,9 @@
 #define FW_FLAG_EXACT_IP    0x4
 #define FW_FLAG_PNAME       0x8
 
+
+
+
 struct fw_rule {
   uint32_t ip_start;
   uint32_t ip_end;
