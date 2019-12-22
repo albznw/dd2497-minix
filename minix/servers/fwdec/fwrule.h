@@ -16,6 +16,7 @@
  * Let fw_rules be a doubly linked list that exists on the HEAP.
  */
 typedef struct fw_rule {
+    uint8_t type;
     uint8_t priority;
     uint8_t action;
     uint32_t ip_start;
@@ -29,7 +30,8 @@ typedef struct fw_rule {
 /**
  * Find first matching rule with highest priority.
  */
-fw_rule *find_matching_rule(fw_rule** head_ref, const uint32_t ip_addr, const char *p_name) {
+fw_rule *find_matching_rule(fw_rule** head_ref, const uint8_t type, const uint32_t ip_addr, const uint16_t port,
+                                const char *p_name) {
 
     uint8_t highest_prio = MIN_PRIORITY;
     fw_rule *chosen_rule = NULL;
@@ -37,8 +39,9 @@ fw_rule *find_matching_rule(fw_rule** head_ref, const uint32_t ip_addr, const ch
     fw_rule *curr_rule = (*head_ref);
 
     while (curr_rule != NULL){
-        if ((curr_rule->ip_start == 0 && curr_rule->ip_end == 0)
-            || (curr_rule->ip_start <= ip_addr && ip_addr <= curr_rule->ip_end)) {
+        if (((curr_rule->ip_start == 0 && curr_rule->ip_end == 0)
+            || (curr_rule->ip_start <= ip_addr && ip_addr <= curr_rule->ip_end))
+            && (curr_rule->port == 0 || curr_rule->port == port) && (curr_rule->type == 0 || curr_rule->type == type)) {
 
             // ip_addr is in this rules range
             if(curr_rule->p_name[0] != '\0'){
@@ -73,10 +76,11 @@ void get_ip_string(char* buf, uint32_t buf_len, uint32_t ip_addr){
  */
 void print_rules(fw_rule** head_ref, const char* chain) {
     printf("Chain %s\n", chain);
-    printf("%-10s%-10s%-16s%-16s%-6s%-18s\n", "action", "priority", "start", "end", "port", "name");
+    printf("%-5s%-8s%-9s%-16s%-16s%-6s%-16s\n", "type", "action", "priority", "start", "end", "port", "name");
     fw_rule *curr_rule = (*head_ref);
     while (curr_rule != NULL){
         char action[7];
+        char type_str[5];
         char start_ip_str[64];
         char end_ip_str[64];
         get_ip_string(start_ip_str, 64, curr_rule->ip_start);
@@ -86,7 +90,18 @@ void print_rules(fw_rule** head_ref, const char* chain) {
         } else {
             strncpy(action, "ACCEPT", 7);
         }
-        printf("%-10s%-10d%-16s%-16s%-6d%-18s\n", action, curr_rule->priority, start_ip_str, end_ip_str,
+        if(curr_rule->type == FW_TCP){
+            strncpy(type_str, "TCP", 5);
+        } else if(curr_rule->type == FW_UDP){
+            strncpy(type_str, "UDP", 5);
+        } else if(curr_rule->type == FW_ICMP){
+            strncpy(type_str, "ICMP", 5);
+        } else if(curr_rule->type == FW_RAW){
+            strncpy(type_str, "RAW", 5);
+        } else {
+            strncpy(type_str, "IP", 5);
+        }
+        printf("%-5s%-8s%-9d%-16s%-16s%-6d%-16s\n", type_str, action, curr_rule->priority, start_ip_str, end_ip_str,
                 curr_rule->port, curr_rule->p_name);
         curr_rule = curr_rule->next;
     }
@@ -97,11 +112,13 @@ void print_rules(fw_rule** head_ref, const char* chain) {
 /**
  * Push a rule to the start of the chain.
  */
-void push_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
-                  const uint8_t action, const char* p_name) {
+void push_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t type, 
+                const uint16_t port, const uint8_t priority, const uint8_t action, const char* p_name) {
 
     fw_rule* new_node = (struct fw_rule*)malloc(sizeof(struct fw_rule));
 
+    new_node->type = type;
+    new_node->port = port;
     new_node->priority = priority;
     new_node->ip_start = ip_start;
     new_node->ip_end = ip_end;
@@ -124,12 +141,13 @@ void push_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_en
 /**
  * Remove the first rule that matches
  */
-void remove_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t priority,
-                    const uint8_t action, const char* p_name) {
+void remove_rule(fw_rule** head_ref, const uint32_t ip_start, const uint32_t ip_end, const uint8_t type, 
+                    const uint16_t port, const uint8_t priority, const uint8_t action, const char* p_name) {
 
     fw_rule *curr_rule = (*head_ref);
     while (curr_rule != NULL){
-        if (curr_rule->ip_start == ip_start && curr_rule->ip_end == ip_end && curr_rule->action == action) {
+        if (curr_rule->ip_start == ip_start && curr_rule->ip_end == ip_end && curr_rule->action == action
+                && curr_rule->type == type && curr_rule->port == port) {
             if(curr_rule->p_name[0] != '\0'){
                 if(p_name != NULL && strncmp(curr_rule->p_name, p_name, MAX_NAME_LEN) == 0){
                     break;

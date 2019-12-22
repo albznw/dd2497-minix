@@ -47,19 +47,19 @@ const char *LOGFILE = "/var/log/fwdec"; //Where the log file should be placed
 int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
 {
   // Push default rules
-  push_rule(&out_rules, IP_ANY, IP_ANY, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
-  push_rule(&in_rules, IP_ANY, IP_ANY, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
+  push_rule(&out_rules, IP_ANY, IP_ANY, FW_IP, 0, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
+  push_rule(&in_rules, IP_ANY, IP_ANY, FW_IP, 0, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
   
   // Push custom hard-coded rules
   uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
   uint32_t google_dns = ip4_from_parts(8, 8, 8, 8);
   uint32_t local_host = ip4_from_parts(127, 0, 0, 1);
-  push_rule(&in_rules, google_dns, google_dns, MAX_PRIORITY, FW_RULE_REJECT, "dig");
-  push_rule(&in_rules, local_host, local_host, MAX_PRIORITY, FW_RULE_REJECT, "telnet");
+  push_rule(&in_rules, google_dns, google_dns, FW_TCP, 0, MAX_PRIORITY, FW_RULE_REJECT, "dig");
+  push_rule(&in_rules, local_host, local_host, FW_TCP, 80, MAX_PRIORITY, FW_RULE_REJECT, "telnet");
 
-  push_rule(&out_rules, kth_ip, kth_ip, MAX_PRIORITY, FW_RULE_REJECT, NULL);
-  push_rule(&out_rules, google_dns, google_dns, MAX_PRIORITY, FW_RULE_ACCEPT, "dig");
-  push_rule(&out_rules, IP_ANY, IP_ANY, MED_PRIORITY, FW_RULE_REJECT, "dig");
+  push_rule(&out_rules, kth_ip, kth_ip, FW_IP, 0, MAX_PRIORITY, FW_RULE_REJECT, NULL);
+  push_rule(&out_rules, google_dns, google_dns, FW_UDP, 53, MAX_PRIORITY, FW_RULE_ACCEPT, "dig");
+  push_rule(&out_rules, IP_ANY, IP_ANY, FW_UDP, 0, MED_PRIORITY, FW_RULE_REJECT, "dig");
 
   printf("Firewall decision server started\n");
   return(OK);
@@ -69,8 +69,8 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
  *				do_publish				                                     *
  *===========================================================================*/
 
-int check_incoming_ip4(const uint32_t src_ip, const char *p_name) {
-  fw_rule *matched_rule = find_matching_rule(&in_rules, src_ip, p_name);
+int check_incoming(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char *p_name) {
+  fw_rule *matched_rule = find_matching_rule(&in_rules, type, src_ip, port, p_name);
 
   if (matched_rule->action == FW_RULE_REJECT) {
     log("Packet dropped\n");
@@ -81,8 +81,8 @@ int check_incoming_ip4(const uint32_t src_ip, const char *p_name) {
   return LWIP_KEEP_PACKET; 
 }
 
-int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
-  fw_rule *matched_rule = find_matching_rule(&out_rules, dest_ip, p_name);
+int check_outgoing(const uint8_t type, const uint32_t dest_ip, const uint16_t port, const char *p_name) {
+  fw_rule *matched_rule = find_matching_rule(&out_rules, type, dest_ip, port, p_name);
 
   if (matched_rule->action == FW_RULE_REJECT) {
     log("Packet dropped\n");
@@ -93,13 +93,13 @@ int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
   return LWIP_KEEP_PACKET; 
 }
 
-int check_incoming_tcp(const uint32_t src_ip, const char *p_name, uint64_t flags) {
+int check_incoming_tcp(const uint32_t src_ip, const uint16_t port, const char *p_name, uint64_t flags) {
   // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
   if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
     log("Packet dropped\n");
     return LWIP_DROP_PACKET;
   }
-  return check_incoming_ip4(src_ip, p_name);
+  return check_incoming(FW_TCP, src_ip, port, p_name);
 }
 
 int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
@@ -107,10 +107,10 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
   printf("fwdec: adding rule\n");
   switch (direction) {
   case 0:
-    push_rule(&in_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    push_rule(&in_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
     break; 
   default:
-    push_rule(&out_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    push_rule(&out_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
     break;
   }
   return 0;
@@ -127,10 +127,10 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t actio
   printf("fwdec: removing rule\n");
   switch (direction) {
   case 0:
-    remove_rule(&in_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
     break; 
   default:
-    remove_rule(&out_rules, ip_start, ip_end, priority, action, *p_name != '\0' ? p_name : NULL);
+    remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
     break;
   }
   return 0;
@@ -142,41 +142,41 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
 
   switch (type) {
     case FWDEC_QUERY_IP4_INC:
-      result = check_incoming_ip4(src_ip, NULL);
+      result = check_incoming(FW_IP, src_ip, 0, NULL);
       break;
     case FWDEC_QUERY_IP4_OUT:
-      result = check_outgoing_ip4(dest_ip, NULL);
+      result = check_outgoing(FW_IP, dest_ip, 0, NULL);
       break;
     case FWDEC_QUERY_TCP_INC:
-      result = check_incoming_tcp(src_ip, p_name, flags);
+      result = check_incoming_tcp(src_ip, src_port, p_name, flags);
       break;
     case FWDEC_QUERY_TCP_OUT:
       // TODO add TCP functions and logic
-      result = check_outgoing_ip4(dest_ip, p_name);
+      result = check_outgoing(FW_TCP, dest_ip, dest_port, p_name);
       break;
     case FWDEC_QUERY_UDP_INC:
       // TODO add UDP functions and logic
-      result = check_incoming_ip4(src_ip, p_name);
+      result = check_incoming(FW_UDP, src_ip, src_port, p_name);
       break;
     case FWDEC_QUERY_UDP_OUT:
       // TODO add UDP functions and logic
-      result = check_outgoing_ip4(dest_ip, p_name);
+      result = check_outgoing(FW_UDP, dest_ip, dest_port, p_name);
       break;
     case FWDEC_QUERY_RAW_INC:
       // TODO add RAW functions and logic
-      result = check_incoming_ip4(src_ip, p_name);
+      result = check_incoming(FW_RAW, src_ip, 0, p_name);
       break;
     case FWDEC_QUERY_RAW_OUT:
       // TODO add RAW functions and logic
-      result = check_outgoing_ip4(dest_ip, p_name);
+      result = check_outgoing(FW_RAW, dest_ip, 0, p_name);
       break;
     case FWDEC_QUERY_ICMP_INC:
       // TODO add ICMP functions and logic
-      result = check_incoming_ip4(src_ip, NULL);
+      result = check_incoming(FW_ICMP, src_ip, 0, NULL);
       break;
     case FWDEC_QUERY_ICMP_OUT:
       // TODO add ICMP functions and logic
-      result = check_outgoing_ip4(dest_ip, NULL);
+      result = check_outgoing(FW_ICMP, dest_ip, 0, NULL);
       break;
     default:
       printf("fwdec: warning, got illegal request %d\n", type);
