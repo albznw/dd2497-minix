@@ -28,6 +28,10 @@ static void debug_log_packet(const int type, const int result, const uint32_t sr
 #endif
 
 static void log(char* log_message);
+int find_rule(fw_rule_t,fw_rule_t);
+fw_rule_t* last_rule(fw_rule_t* currRule);
+fw_rule_t* find_rule_before(fw_rule_t* currRule,fw_rule_t* ruleTofind);
+char compare_rules(fw_rule_t* rule1,fw_rule_t* rule2);
 
 static fw_rule* out_rules = NULL;
 static fw_rule* in_rules = NULL;
@@ -90,7 +94,7 @@ int check_outgoing(const uint8_t type, const uint32_t dest_ip, const uint16_t po
   }
 
   log("Packet accepted\n");
-  return LWIP_KEEP_PACKET; 
+  return LWIP_KEEP_PACKET;
 }
 
 int check_incoming_tcp(const uint32_t src_ip, const uint16_t port, const char *p_name, uint64_t flags) {

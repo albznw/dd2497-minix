@@ -38,3 +38,16 @@ int fwdec_query_packet(int type, uint32_t src_ip, uint32_t dest_ip, endpoint_t u
 
 	return do_invoke_fwdec(&m);
 }
+
+int fwdec_add_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action) {
+	message m;
+	memset(&m, 0, sizeof(m));
+
+	m.m_type = FWDEC_ADD_RULE;
+	m.m_fwdec_rule_message.src_ip = src_ip;
+	m.m_fwdec_rule_message.dest_ip = dest_ip;
+	strcpy(m.m_fwdec_rule_message.p_name,p_name);
+	m.m_fwdec_rule_message.action = action;
+
+	return do_invoke_fwdec(&m);
+}

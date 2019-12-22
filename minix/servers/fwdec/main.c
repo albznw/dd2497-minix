@@ -31,21 +31,20 @@ static void sef_local_startup(void);
  *===========================================================================*/
 int main(int argc, char **argv)
 {
-/* This is the main routine of this service. The main loop consists of 
+/* This is the main routine of this service. The main loop consists of
  * three major activities: getting new work, processing the work, and
  * sending the reply. The loop never terminates, unless a panic occurs.
  */
-  
+
   message m;
-  int result;                 
+  int result;
 
   /* SEF local startup. */
   env_setargs(argc, argv);
   sef_local_startup();
 
-  /* Main loop - get work and do it, forever. */         
-  while (TRUE) { 
-
+  /* Main loop - get work and do it, forever. */
+  while (TRUE) {
       /* Wait for incoming message, sets 'callnr' and 'who'. */
       get_work(&m);
 
@@ -54,7 +53,7 @@ int main(int argc, char **argv)
           result = EINVAL;
           goto send_reply;
       }
-    
+
     switch (callnr)
     {
     case FWDEC_ADD_RULE:
