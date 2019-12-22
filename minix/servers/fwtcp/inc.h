@@ -1,5 +1,5 @@
-#ifndef _MYSERVER_INC_H
-#define _MYSERVER_INC_H
+#ifndef _FWTCP_INC_H
+#define _FWTCP_INC_H
 
 /* Header file including all needed system headers. */
 

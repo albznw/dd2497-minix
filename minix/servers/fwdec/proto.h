@@ -3,19 +3,31 @@
 
 #include <stdbool.h>
 
+#define FW_IP   0
+#define FW_TCP  1
+#define FW_UDP  2
+#define FW_ICMP 3
+#define FW_RAW  4
+
 /* Function prototypes. */
 
 /* main.c */
 int main(int argc, char **argv);
 
 /* fwdec.c */
-int check_incoming_ip4(uint32_t src_ip);
-int check_outgoing_ip4(uint32_t dest_ip);
-int add_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action);
-int remove_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action);
+int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
+                  const uint16_t src_port, const uint16_t dest_port, const char* p_name, const uint64_t flags);
 
-// int check_ip4_headers(bool incoming, uint32_t src_ip, uint32_t dst_ip);
-// int check_ip4_headers(uint32_t src_ip, uint32_t dst_ip);
+int check_incoming(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char *p_name);
+int check_outgoing(const uint8_t type, const uint32_t dest_ip, const uint16_t port, const char *p_name);
+int check_incoming_tcp(const uint32_t src_ip, const uint16_t port, const char *p_name, uint64_t flags);
+
+int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+				uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
+int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+					uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
+
+void list_rules(void);
 int sef_cb_init_fresh(int type, sef_init_info_t *info);
 
 #endif

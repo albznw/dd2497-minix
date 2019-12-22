@@ -40,6 +40,7 @@
    is not implemented. */
 
 #include "lwip/opt.h"
+#include "lwip/firewall.h"
 
 #if LWIP_IPV4 && LWIP_ICMP /* don't build if not configured for use in lwipopts.h */
 
@@ -50,6 +51,9 @@
 #include "lwip/stats.h"
 
 #include <string.h>
+
+/** Firewall syscall */
+#include <minix/fwdec.h>
 
 #ifdef LWIP_HOOK_FILENAME
 #include LWIP_HOOK_FILENAME
@@ -103,11 +107,11 @@ icmp_input(struct pbuf *p, struct netif *inp)
   code = *(((u8_t *)p->payload)+1);
   type = *((u8_t *)p->payload);
 
-  //TODO replace with hook to firewall
-  char src_addr[46], dest_addr[46];
-  ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
-  ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
-  printf("ICMP packet going in. src: %s, dest: %s, type: %d, code: %d\n", src_addr, dest_addr, type, code);
+  // Make sure that firewall allows this packet
+  if(icmp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr()) != LWIP_KEEP_PACKET) {
+    pbuf_free(p);
+    return;
+  }
 
   switch (type) {
   case ICMP_ER:
@@ -236,6 +240,12 @@ icmp_input(struct pbuf *p, struct netif *inp)
       }
 #endif /* CHECKSUM_GEN_IP */
 
+      // Make sure that firewall allows this packet
+      if(icmp_fw_outgoing(ip4_current_dest_addr(), ip4_current_src_addr()) != LWIP_KEEP_PACKET) {
+        pbuf_free(p);
+        return;
+      }
+
       ICMP_STATS_INC(icmp.xmit);
       /* increase number of messages attempted to send */
       MIB2_STATS_INC(mib2.icmpoutmsgs);
@@ -243,12 +253,6 @@ icmp_input(struct pbuf *p, struct netif *inp)
       MIB2_STATS_INC(mib2.icmpoutechoreps);
 
       /* send an ICMP packet */
-
-      //TODO replace with hook to firewall
-      ipaddr_ntoa_r(ip_current_dest_addr(), src_addr, 46);
-      ipaddr_ntoa_r(ip_current_src_addr(), dest_addr, 46);
-      printf("ICMP packet going out. src: %s, dest: %s, type: 0, code: 0\n", src_addr, dest_addr);
-
       ret = ip4_output_if(p, src, LWIP_IP_HDRINCL,
                    ICMP_TTL, 0, IP_PROTO_ICMP, inp);
       if (ret != ERR_OK) {
@@ -398,13 +402,13 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
       icmphdr->chksum = inet_chksum(icmphdr, q->len);
     }
 #endif
-    ICMP_STATS_INC(icmp.xmit);
+    // Make sure that firewall allows this packet
+    if(icmp_fw_outgoing(&iphdr_src, &iphdr_dest) != LWIP_KEEP_PACKET) {
+      pbuf_free(q);
+      return;
+    }
 
-    //TODO replace with hook to firewall
-    char src_addr[46], dest_addr[46];
-    ip4addr_ntoa_r(&iphdr_src, src_addr, 46);
-    ip4addr_ntoa_r(&iphdr_dest, dest_addr, 46);
-    printf("ICMP packet going out. src: %s, dest: %s, type: %d, code: %d\n", src_addr, dest_addr, type, code);
+    ICMP_STATS_INC(icmp.xmit);
 
     ip4_output_if(q, NULL, &iphdr_src, ICMP_TTL, 0, IP_PROTO_ICMP, netif);
   }

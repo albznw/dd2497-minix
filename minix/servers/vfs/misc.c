@@ -13,6 +13,7 @@
  *   do_exit:	  a process has exited; note that in the tables
  *   do_set:	  set uid or gid for some process
  *   do_revive:	  revive a process that was waiting for something (e.g. TTY)
+ *   do_fwctl:	  firewall control
  *   do_svrctl:	  file system control
  *   do_getsysinfo:	request copy of FS data structure
  *   pm_dumpcore: create a core dump
@@ -789,6 +790,34 @@ void pm_setsid(endpoint_t proc_e)
   rfp = &fproc[slot];
   rfp->fp_flags |= FP_SESLDR;
   rfp->fp_tty = 0;
+}
+
+/*===========================================================================*
+ *				do_fwctl				     *
+ *===========================================================================*/
+int do_fwctl(void) {
+	// Only super user should be allowed to control the firewall settings!
+	if (!super_user) return(EPERM);
+
+	// Copy message and send it to the firewall
+	message m;
+	memset(&m, 0, sizeof(m));
+
+	m.m_type = job_m_in.m_fwdec_rule.method;
+	m.m_fwdec_rule.direction = job_m_in.m_fwdec_rule.direction;
+	m.m_fwdec_rule.type = job_m_in.m_fwdec_rule.type;
+	m.m_fwdec_rule.priority = job_m_in.m_fwdec_rule.priority;
+	m.m_fwdec_rule.action = job_m_in.m_fwdec_rule.action;
+	m.m_fwdec_rule.ip_start = job_m_in.m_fwdec_rule.ip_start;
+	m.m_fwdec_rule.ip_end = job_m_in.m_fwdec_rule.ip_end;
+	m.m_fwdec_rule.port = job_m_in.m_fwdec_rule.port;
+	strncpy(m.m_fwdec_rule.p_name, job_m_in.m_fwdec_rule.p_name, 16);
+
+	int res = ipc_sendrec(FWDEC_PROC_NR, &m);
+	if (res != OK) {
+		return res;
+	}
+	return m.m_type;
 }
 
 /*===========================================================================*

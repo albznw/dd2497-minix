@@ -290,7 +290,7 @@
 ./service/lwip                                          minix-base
 ./service/memory                                        minix-base
 ./service/mydriver                                      minix-base
-./service/myserver                                      minix-base
+./service/fwtcp                                         minix-base
 ./service/fwdec						minix-base
 ./service/decision					minix-base	obsolete
 ./service/mfs                                           minix-base
@@ -583,6 +583,7 @@
 ./usr/bin/sum                                           minix-base
 ./usr/bin/svclog                                        minix-base      obsolete
 ./usr/bin/svrctl                                        minix-base
+./usr/bin/firewall                                      minix-base
 ./usr/bin/swifi                                         minix-base
 ./usr/bin/synctree                                      minix-base
 ./usr/bin/sz                                            minix-base

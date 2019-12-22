@@ -32,7 +32,7 @@
  *   0x1800 - 0x18FF	Management Information Base (MIB) requests
  *   0x1900 - 0x19FF	Socket device requests and responses
  *   0x1A00 - 0x1AFF	Network device requests and responses
- *   0x1B00 - 0x1BFF	myserver, example server
+ *   0x1B00 - 0x1BFF	fwtcp, Firewall TCP decision server
  *   0x1C00 - 0x1CFF	fwdec, Firewall decision server
  *
  * Zero and negative values are widely used for OK and error responses.
@@ -69,7 +69,7 @@
 #define VM_PROC_NR   ((endpoint_t) 8)   /* memory server */
 #define PFS_PROC_NR  ((endpoint_t) 9)  /* pipe filesystem */
 #define MFS_PROC_NR  ((endpoint_t) 10)  /* minix root filesystem */
-#define MYSERVER_PROC_NR  ((endpoint_t) 11)  /* minix root filesystem */
+#define FWTCP_PROC_NR  ((endpoint_t) 11)  /* minix root filesystem */
 #define FWDEC_PROC_NR     ((endpoint_t) 12)  /* Firewall decision server */
 #define LAST_SPECIAL_PROC_NR	13	/* An untyped version for
                                            computation in macros.*/
@@ -1150,12 +1150,12 @@
 #  define NDEV_LINK_DOWN	2	/* link is down */
 
 /*===========================================================================*
- *			Messages for MYSERVER				     *
+ *			Messages for FWTCP				     *
  *===========================================================================*/
 
-#define MYSERVER_BASE 0x1B00
+#define FWTCP_BASE 0x1B00
 
-#define MYSERVER_SYS1		(MYSERVER_BASE + 0)	/* Syscall 1 */
+#define FWTCP_CHECK_PACKET	(FWTCP_BASE + 0)	/* Syscall 1 */
 
 /*===========================================================================*
 *		Messages for the firewall decision server		     *
@@ -1163,8 +1163,28 @@
 
 #define FWDEC_BASE 0X1C00
 
-#define FWDEC_QUERY_IP4_INC (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
-#define FWDEC_QUERY_IP4_OUT (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
+#define FWDEC_QUERY_IP4_INC  (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
+#define FWDEC_QUERY_IP4_OUT  (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
+#define FWDEC_QUERY_TCP_INC  (FWDEC_BASE + 2) /* Drop TCP packet or not (incoming) */
+#define FWDEC_QUERY_TCP_OUT  (FWDEC_BASE + 3) /* Drop TCP packet or not (outgoing) */
+#define FWDEC_QUERY_UDP_INC  (FWDEC_BASE + 4) /* Drop UDP packet or not (incoming) */
+#define FWDEC_QUERY_UDP_OUT  (FWDEC_BASE + 5) /* Drop UDP packet or not (outgoing) */
+#define FWDEC_QUERY_RAW_INC  (FWDEC_BASE + 6) /* Drop RAW packet or not (incoming) */
+#define FWDEC_QUERY_RAW_OUT  (FWDEC_BASE + 7) /* Drop RAW packet or not (outgoing) */
+#define FWDEC_QUERY_ICMP_INC (FWDEC_BASE + 8) /* Drop ICMP packet or not (incoming) */
+#define FWDEC_QUERY_ICMP_OUT (FWDEC_BASE + 9) /* Drop ICMP packet or not (outgoing) */
+
+#define FWDEC_ADD_RULE (FWDEC_BASE + 10) /* Add firewall rule */
+#define FWDEC_DEL_RULE (FWDEC_BASE + 11) /* Delete firewall rule */
+#define FWDEC_LIST_RULES (FWDEC_BASE + 12) /* List all firewall rules */
+
+/* Packet specific flags */
+#define FWDEC_SET_TCP_SYN(flags) (flags |= (1 << 0))
+#define FWDEC_GET_TCP_SYN(flags) (flags & (1 << 0))
+#define FWDEC_SET_TCP_ACK(flags) (flags |= (1 << 1))
+#define FWDEC_GET_TCP_ACK(flags) (flags & (1 << 1))
+#define FWDEC_SET_TCP_FIN(flags) (flags |= (1 << 2))
+#define FWDEC_GET_TCP_FIN(flags) (flags & (1 << 2))
 
 #define FWDEC_ADD_RULE (FWDEC_BASE + 2)
 #define FWDEC_REMOVE_RULE (FWDEC_BASE + 3)
@@ -1175,8 +1195,8 @@
 
 #define LWIP_BASE 0X1D00
 
-#define LWIP_KEEP_PACKET 	(FWDEC_BASE + 0)	/* Do not drop the packet */
-#define LWIP_DROP_PACKET 	(FWDEC_BASE + 1)	/* Drop the packet */
+#define LWIP_KEEP_PACKET 	(LWIP_BASE + 0)	/* Do not drop the packet */
+#define LWIP_DROP_PACKET 	(LWIP_BASE + 1)	/* Drop the packet */
 
 /*===========================================================================*
  *		Internal codes used by several services			     *

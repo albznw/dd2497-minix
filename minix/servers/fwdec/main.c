@@ -10,10 +10,14 @@
 /* Allocate space for the global variables. */
 static endpoint_t who_e;	/* caller's proc number */
 static int callnr;		/* system call number */
-static uint32_t ip4_src_ip;
-static uint32_t ip4_dest_ip;
-static char p_name[16];
-static uint8_t action;
+
+/* Message parameters */
+static char proc_name[16];
+static uint32_t src_ip;
+static uint32_t dest_ip;
+static uint16_t src_port;
+static uint16_t dest_port;
+static uint64_t flags;
 
 /* Declare local functions. */
 static void get_work(message *m_ptr);
@@ -41,7 +45,6 @@ int main(int argc, char **argv)
 
   /* Main loop - get work and do it, forever. */
   while (TRUE) {
-
       /* Wait for incoming message, sets 'callnr' and 'who'. */
       get_work(&m);
 
@@ -50,23 +53,33 @@ int main(int argc, char **argv)
           result = EINVAL;
           goto send_reply;
       }
-      switch (callnr) {
-      case FWDEC_QUERY_IP4_INC:
-          result = check_incoming_ip4(ip4_src_ip);
-          break;
-      case FWDEC_QUERY_IP4_OUT:
-          result = check_outgoing_ip4(ip4_dest_ip);
-          break;
-      case FWDEC_ADD_RULE:
-          result = add_rule(ip4_src_ip,ip4_dest_ip,p_name,action);
-          break;
-      case FWDEC_REMOVE_RULE:
-          result = remove_rule(ip4_src_ip,ip4_dest_ip,p_name,action);
-          break;
-      default:
-          printf("fwdec: warning, got illegal request from %d\n", m.m_source);
-          result = EINVAL;
+
+    switch (callnr)
+    {
+    case FWDEC_ADD_RULE:
+      result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
+				                m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+      break;
+    case FWDEC_DEL_RULE:
+      result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
+				                    m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+      break;
+    case FWDEC_LIST_RULES:
+      list_rules();
+      result = OK;
+      break;
+    default:
+      if(m.m_fwdec_ip4.user_endp) {
+        getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);
       }
+      src_ip = m.m_fwdec_ip4.src_ip;
+      dest_ip = m.m_fwdec_ip4.dest_ip;
+      src_port = m.m_fwdec_ip4.src_port;
+      dest_port = m.m_fwdec_ip4.dest_port;
+      flags = m.m_fwdec_ip4.flags;
+      result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags);
+      break;
+    }
 
 send_reply:
       memset(&m,0, sizeof(m));
@@ -104,16 +117,6 @@ static void get_work(
         panic("failed to receive message!: %d", status);
     who_e = m_ptr->m_source;        /* message arrived! set sender */
     callnr = m_ptr->m_type;       /* set function call number */
-    if(callnr==FWDEC_QUERY_IP4_INC||callnr==FWDEC_QUERY_IP4_OUT){
-      ip4_src_ip = m_ptr->m_fwdec_ip4.src_ip;
-      ip4_dest_ip = m_ptr->m_fwdec_ip4.dest_ip;
-    }
-    if(callnr==FWDEC_ADD_RULE||callnr==FWDEC_REMOVE_RULE){
-      ip4_src_ip = m_ptr->m_fwdec_rule_message.src_ip;
-      ip4_dest_ip = m_ptr->m_fwdec_rule_message.dest_ip;
-      strcpy(p_name,m_ptr->m_fwdec_rule_message.p_name);
-      action = m_ptr->m_fwdec_rule_message.action;
-    }
 }
 
 /*===========================================================================*

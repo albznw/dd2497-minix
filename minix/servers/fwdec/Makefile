@@ -1,4 +1,4 @@
-# Makefile for MyServer
+# Makefile for FWTCP
 PROG=	fwdec
 SRCS=	main.c fwdec.c
 

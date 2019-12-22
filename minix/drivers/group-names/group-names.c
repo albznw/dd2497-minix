@@ -8,8 +8,6 @@
 #include <include/arch/i386/include/archtypes.h>
 #include "kernel/proc.h"
 #include <minix/sysinfo.h>
-#include <minix/myserver.h>
-//#include <minix/fwdec.h>
 #include "servers/pm/mproc.h"
 
 /* SEF functions and variables. */
@@ -41,7 +39,7 @@ static int sef_cb_init(int type, sef_init_info_t *UNUSED(info))
   open_counter = 0;
   switch(type) {
   case SEF_INIT_FRESH:
-    printf("Initializing");
+    printf("Initializing\n");
     break;
  
   case SEF_INIT_LU:
@@ -110,7 +108,6 @@ static int groupNames_open(devminor_t UNUSED(minor), int UNUSED(access),
   //printf("groupNames_open(). Called %d time(s).\n", ++open_counter);
 
   //fwdec_check_packet();
-  myserver_sys1();
   return OK;
 }
  

@@ -8,7 +8,7 @@
 #include <minix/param.h>
 #include <regex.h>
 
-#define FWDEC_DEBUG 0//Set to 1 to enable additional info on stdout, 0 to disable
+#define FWDEC_DEBUG //Uncomment this line to enable debug output
 
 #define MODE_NOTSET 0
 #define MODE_WHITELIST 1
@@ -32,15 +32,5 @@
 
 
 
-
-struct fw_rule {
-  uint32_t ip_start;
-  uint32_t ip_end;
-  char *p_name;
-  uint8_t action;
-  struct fw_rule *next;
-};
-
-typedef struct fw_rule fw_rule_t;
 
 #endif // _FWDEC_H_

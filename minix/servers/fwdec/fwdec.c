@@ -5,6 +5,9 @@
 
 #include "inc.h"
 #include "fwdec.h"
+
+#include "fwrule.h"
+
 #include <minix/com.h>
 
 #include <stdlib.h>
@@ -16,29 +19,18 @@
 #include <fcntl.h> //File handling flags
 #include <sys/time.h> //System time
 
+#include <minix/fwtcp.h>
+
 /* Declare local functions. */
-static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr, const char *p_name);
+#ifdef FWDEC_DEBUG
+static void debug_log_packet(const int type, const int result, const uint32_t src_ip, const uint32_t dest_ip,
+                              const uint16_t src_port, const uint16_t dest_port, const char* p_name);
+#endif
+
 static void log(char* log_message);
-int find_rule(fw_rule_t,fw_rule_t);
-fw_rule_t* last_rule(fw_rule_t* currRule);
-fw_rule_t* find_rule_before(fw_rule_t* currRule,fw_rule_t* ruleTofind);
-char compare_rules(fw_rule_t* rule1,fw_rule_t* rule2);
 
-static fw_rule_t default_incoming_rule = {
-  .ip_start = IP_ANY,
-  .ip_end = IP_ANY,
-  .p_name = NULL,
-  .action = FW_RULE_ACCEPT,
-  .next = NULL,
-};
-
-static fw_rule_t default_outgoing_rule = {
-  .ip_start = IP_ANY,
-  .ip_end = IP_ANY,
-  .p_name = NULL,
-  .action = FW_RULE_ACCEPT,
-  .next = NULL,
-};
+static fw_rule* out_rules = NULL;
+static fw_rule* in_rules = NULL;
 
 static inline uint32_t ip4_from_parts(uint8_t p1, uint8_t p2, uint8_t p3, uint8_t p4)
 {
@@ -54,6 +46,21 @@ const char *LOGFILE = "/var/log/fwdec"; //Where the log file should be placed
  *===========================================================================*/
 int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
 {
+  // Push default rules
+  push_rule(&out_rules, IP_ANY, IP_ANY, FW_IP, 0, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
+  push_rule(&in_rules, IP_ANY, IP_ANY, FW_IP, 0, MIN_PRIORITY, FW_RULE_ACCEPT, NULL);
+  
+  // Push custom hard-coded rules
+  uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
+  uint32_t google_dns = ip4_from_parts(8, 8, 8, 8);
+  uint32_t local_host = ip4_from_parts(127, 0, 0, 1);
+  push_rule(&in_rules, google_dns, google_dns, FW_TCP, 0, MAX_PRIORITY, FW_RULE_REJECT, "dig");
+  push_rule(&in_rules, local_host, local_host, FW_TCP, 80, MAX_PRIORITY, FW_RULE_REJECT, "telnet");
+
+  push_rule(&out_rules, kth_ip, kth_ip, FW_IP, 0, MAX_PRIORITY, FW_RULE_REJECT, NULL);
+  push_rule(&out_rules, google_dns, google_dns, FW_UDP, 53, MAX_PRIORITY, FW_RULE_ACCEPT, "dig");
+  push_rule(&out_rules, IP_ANY, IP_ANY, FW_UDP, 0, MED_PRIORITY, FW_RULE_REJECT, "dig");
+
   printf("Firewall decision server started\n");
   return(OK);
 }
@@ -62,25 +69,20 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
  *				do_publish				                                     *
  *===========================================================================*/
 
-int check_incoming_ip4(uint32_t src_ip) {
-  return LWIP_KEEP_PACKET;
+int check_incoming(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char *p_name) {
+  fw_rule *matched_rule = find_matching_rule(&in_rules, type, src_ip, port, p_name);
+
+  if (matched_rule->action == FW_RULE_REJECT) {
+    log("Packet dropped\n");
+    return LWIP_DROP_PACKET;
+  }
+
+  log("Packet accepted\n");
+  return LWIP_KEEP_PACKET; 
 }
 
-int check_outgoing_ip4(uint32_t dest_ip) {
-  fw_rule_t *rules = &default_outgoing_rule;
-  uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
-
-  fw_rule_t kth_rule = {
-    .ip_start = kth_ip,
-    .ip_end = kth_ip,
-    .action = FW_RULE_REJECT,
-    .next = rules,
-    .p_name = NULL
-  };
-
-  rules = &kth_rule;
-  // Change NULL to incoming pname
-  fw_rule_t *matched_rule = find_matching_rule(rules, dest_ip, NULL);
+int check_outgoing(const uint8_t type, const uint32_t dest_ip, const uint16_t port, const char *p_name) {
+  fw_rule *matched_rule = find_matching_rule(&out_rules, type, dest_ip, port, p_name);
 
   if (matched_rule->action == FW_RULE_REJECT) {
     log("Packet dropped\n");
@@ -91,45 +93,101 @@ int check_outgoing_ip4(uint32_t dest_ip) {
   return LWIP_KEEP_PACKET;
 }
 
-static fw_rule_t *find_matching_rule(fw_rule_t *rules, uint32_t ip_addr, const char *p_name)
-{
-  fw_rule_t *curr_rule = rules;
-  fw_rule_t *chosen_rule = NULL;
-  uint8_t chosen_flags = 0;
-  bool name_match = false;
+int check_incoming_tcp(const uint32_t src_ip, const uint16_t port, const char *p_name, uint64_t flags) {
+  // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
+  if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
+    log("Packet dropped\n");
+    return LWIP_DROP_PACKET;
+  }
+  return check_incoming(FW_TCP, src_ip, port, p_name);
+}
 
-  while (curr_rule != NULL) {
-    uint8_t curr_flags = 0;
+int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+				uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+  printf("fwdec: adding rule\n");
+  switch (direction) {
+  case 0:
+    push_rule(&in_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
+    break; 
+  default:
+    push_rule(&out_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
+    break;
+  }
+  return 0;
+}
 
-    if (curr_rule->ip_start == 0 && curr_rule->ip_end == 0) {
-      curr_flags |= FW_FLAG_ANY_IP;
-    }
+void list_rules(void) {
+  print_rules(&in_rules, "INC");
+  print_rules(&out_rules, "OUT");
+  return;
+}
 
-    if (curr_rule->ip_start <= ip_addr && ip_addr <= curr_rule->ip_end) {
-      curr_flags |= FW_FLAG_IP_IN_RANGE;
-    }
+int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+					uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+  printf("fwdec: removing rule\n");
+  switch (direction) {
+  case 0:
+    remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
+    break; 
+  default:
+    remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action, *p_name != '\0' ? p_name : NULL);
+    break;
+  }
+  return 0;
+}
 
-    if (curr_rule->ip_start == ip_addr && ip_addr == curr_rule->ip_end) {
-      curr_flags |= FW_FLAG_EXACT_IP;
-    }
+int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
+                  const uint16_t src_port, const uint16_t dest_port, const char* p_name, const uint64_t flags) {
+  int result;
 
-    if (curr_rule->p_name == NULL && !name_match && curr_flags > chosen_flags) {
-      chosen_rule = curr_rule;
-      chosen_flags = curr_flags;
-    } else if (p_name != NULL && curr_rule->p_name != NULL && strcmp(p_name, curr_rule->p_name) == 0) {
-      if (!name_match && curr_flags > 0) {
-        chosen_rule = curr_rule;
-        chosen_flags = curr_flags;
-        name_match = true;
-      } else if (name_match && curr_flags > chosen_flags) {
-        chosen_rule = curr_rule;
-        chosen_flags = curr_flags;
-      }
-    }
-    curr_rule = curr_rule->next;
+  switch (type) {
+    case FWDEC_QUERY_IP4_INC:
+      result = check_incoming(FW_IP, src_ip, 0, NULL);
+      break;
+    case FWDEC_QUERY_IP4_OUT:
+      result = check_outgoing(FW_IP, dest_ip, 0, NULL);
+      break;
+    case FWDEC_QUERY_TCP_INC:
+      result = check_incoming_tcp(src_ip, src_port, p_name, flags);
+      break;
+    case FWDEC_QUERY_TCP_OUT:
+      // TODO add TCP functions and logic
+      result = check_outgoing(FW_TCP, dest_ip, dest_port, p_name);
+      break;
+    case FWDEC_QUERY_UDP_INC:
+      // TODO add UDP functions and logic
+      result = check_incoming(FW_UDP, src_ip, src_port, p_name);
+      break;
+    case FWDEC_QUERY_UDP_OUT:
+      // TODO add UDP functions and logic
+      result = check_outgoing(FW_UDP, dest_ip, dest_port, p_name);
+      break;
+    case FWDEC_QUERY_RAW_INC:
+      // TODO add RAW functions and logic
+      result = check_incoming(FW_RAW, src_ip, 0, p_name);
+      break;
+    case FWDEC_QUERY_RAW_OUT:
+      // TODO add RAW functions and logic
+      result = check_outgoing(FW_RAW, dest_ip, 0, p_name);
+      break;
+    case FWDEC_QUERY_ICMP_INC:
+      // TODO add ICMP functions and logic
+      result = check_incoming(FW_ICMP, src_ip, 0, NULL);
+      break;
+    case FWDEC_QUERY_ICMP_OUT:
+      // TODO add ICMP functions and logic
+      result = check_outgoing(FW_ICMP, dest_ip, 0, NULL);
+      break;
+    default:
+      printf("fwdec: warning, got illegal request %d\n", type);
+      result = EINVAL;
   }
 
-  return chosen_rule;
+  #ifdef FWDEC_DEBUG
+  debug_log_packet(type, result, src_ip, dest_ip, src_port, dest_port, p_name);
+  #endif
+
+  return result;
 }
 
 static void log(char* log_message)
@@ -150,67 +208,51 @@ static void log(char* log_message)
   close(fd);
 }
 
-int add_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action){
-  fw_rule_t* finalRule = last_rule(&default_incoming_rule);
-  if(finalRule){
-    return -1;
-  }
-  fw_rule_t* tmp = malloc(sizeof(fw_rule_t));
-  tmp -> from_ip = src_ip;
-  tmp -> to_ip = dest_ip;
-  tmp -> p_name = p_name;
-  tmp -> action = action;
-  tmp -> next = NULL;
-  finalRule -> next = tmp;
-  return 1;
-}
+#ifdef FWDEC_DEBUG
+static void debug_log_packet(const int type, const int result, const uint32_t src_ip, const uint32_t dest_ip,
+                              const uint16_t src_port, const uint16_t dest_port, const char* p_name) {
 
-int remove_rule(uint32_t src_ip, uint32_t dest_ip, char* p_name, uint8_t action){
-  fw_rule_t* tmp = malloc(sizeof(fw_rule_t));
-  tmp -> from_ip = src_ip;
-  tmp -> to_ip = dest_ip;
-  tmp -> p_name = p_name;
-  tmp -> action = action;
-  tmp -> next = NULL;
-  fw_rule_t* tmp2;
-  tmp2 = find_rule_before(tmp,&default_incoming_rule);
-  if(tmp2){
-    free(tmp2 -> next);
-    free(tmp -> next);
-    tmp2 -> next = (tmp2 -> next) -> next;
+  unsigned char src_bytes[4] = {src_ip & 0xFF, (src_ip >> 8) & 0xFF, (src_ip >> 16) & 0xFF, (src_ip >> 24) & 0xFF};
+  unsigned char dest_bytes[4] = {dest_ip & 0xFF, (dest_ip >> 8) & 0xFF, (dest_ip >> 16) & 0xFF, (dest_ip >> 24) & 0xFF};
+  char src_ip_str[64];
+  char dest_ip_str[64];
+  snprintf(src_ip_str, 64, "%d.%d.%d.%d", src_bytes[0], src_bytes[1], src_bytes[2], src_bytes[3]);
+  snprintf(dest_ip_str, 64, "%d.%d.%d.%d", dest_bytes[0], dest_bytes[1], dest_bytes[2], dest_bytes[3]);
+
+  char result_str[8];
+  if(result == LWIP_DROP_PACKET){
+    strcpy(result_str, "BLOCKED");
   } else {
-    free(tmp);
-    return -1;
+    strcpy(result_str, "ALLOWED");
   }
-  free(tmp);
-  return 1;
-}
 
-fw_rule_t* find_rule_before(fw_rule_t* currRule,fw_rule_t* ruleTofind){
-  if(compare_rules(currRule,ruleTofind)){
-    default_incoming_rule = *(currRule -> next);
+  switch (type) {
+    case FWDEC_QUERY_TCP_INC:
+      printf("TCP IN %s:%d <- %s:%d (%s) %s\n", dest_ip_str, dest_port, src_ip_str, src_port, p_name, result_str);
+      break;
+    case FWDEC_QUERY_TCP_OUT:
+      printf("TCP OUT %s:%d -> %s:%d (%s) %s\n", src_ip_str, src_port, dest_ip_str, dest_port, p_name, result_str);
+      break;
+    case FWDEC_QUERY_UDP_INC:
+      printf("UDP IN %s:%d <- %s:%d (%s) %s\n", dest_ip_str, dest_port, src_ip_str, src_port, p_name, result_str);
+      break;
+    case FWDEC_QUERY_UDP_OUT:
+      printf("UDP OUT %s:%d -> %s:%d (%s) %s\n", src_ip_str, src_port, dest_ip_str, dest_port, p_name, result_str);
+      break;
+    case FWDEC_QUERY_RAW_INC:
+      printf("RAW IN %s <- %s (%s) %s\n", dest_ip_str, src_ip_str, p_name, result_str);
+      break;
+    case FWDEC_QUERY_RAW_OUT:
+      printf("RAW OUT %s -> %s (%s) %s\n", src_ip_str, dest_ip_str, p_name, result_str);
+      break;
+    case FWDEC_QUERY_ICMP_INC:
+      printf("ICMP IN %s <- %s %s\n", dest_ip_str, src_ip_str, result_str);
+      break;
+    case FWDEC_QUERY_ICMP_OUT:
+      printf("ICMP OUT %s -> %s %s\n", src_ip_str, dest_ip_str, result_str);
+      break;
+    default: 
+      break;
   }
-  while(currRule -> next!=NULL){
-    if(compare_rules(currRule -> next,ruleTofind)){
-      return currRule;
-    }
-    currRule=currRule -> next;
-  }
-  return NULL;
 }
-
-char compare_rules(fw_rule_t* rule1,fw_rule_t* rule2){
-  if(rule1 -> from_ip==rule2 -> from_ip)
-    if(rule1 -> to_ip==rule2 -> to_ip)
-      if(strcmp(rule1 -> p_name,rule2 -> p_name))
-        if(rule1 -> action==rule2 -> action)
-          return 1;
-  return 0;
-}
-
-fw_rule_t* last_rule(fw_rule_t* currRule){
-    while(currRule -> next){
-      currRule=currRule -> next;
-    }
-    return currRule;
-}
+#endif

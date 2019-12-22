@@ -42,6 +42,7 @@
  */
 
 #include "lwip/opt.h"
+#include "lwip/firewall.h"
 
 #if LWIP_TCP /* don't build if not configured for use in lwipopts.h */
 
@@ -59,6 +60,9 @@
 #include "lwip/nd6.h"
 #endif /* LWIP_ND6_TCP_REACHABILITY_HINTS */
 
+/** Firewall syscall */
+#include <minix/fwdec.h>
+
 /** Initial CWND calculation as defined RFC 2581 */
 #define LWIP_TCP_CALC_INITIAL_CWND(mss) LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U));
 
@@ -75,6 +79,7 @@ static u32_t seqno, ackno;
 static tcpwnd_size_t recv_acked;
 static u16_t tcplen;
 static u8_t flags;
+static uint64_t fw_flags;
 
 static u8_t recv_flags;
 static struct pbuf *recv_data;
@@ -214,6 +219,11 @@ tcp_input(struct pbuf *p, struct netif *inp)
   tcphdr->wnd = lwip_ntohs(tcphdr->wnd);
 
   flags = TCPH_FLAGS(tcphdr);
+
+  if(flags & TCP_SYN) FWDEC_SET_TCP_SYN(fw_flags);
+  if(flags & TCP_ACK) FWDEC_SET_TCP_ACK(fw_flags);
+  if(flags & TCP_FIN) FWDEC_SET_TCP_FIN(fw_flags);
+
   tcplen = p->tot_len + ((flags & (TCP_FIN | TCP_SYN)) ? 1 : 0);
 
   /* Demultiplex an incoming segment. First, we check if it is destined
@@ -254,12 +264,20 @@ tcp_input(struct pbuf *p, struct netif *inp)
           pcb->local_port == tcphdr->dest &&
           ip_addr_cmp(&pcb->remote_ip, ip_current_src_addr()) &&
           ip_addr_cmp(&pcb->local_ip, ip_current_dest_addr())) {
+
+        // Make sure that firewall allows this packet
+        if(IP_IS_V4(ip_current_src_addr())){
+          if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
+              tcp_get_user_endp(pcb), fw_flags) != LWIP_KEEP_PACKET) {
+            goto dropped;
+          }
+        }
+
         /* We don't really care enough to move this PCB to the front
            of the list since we are not very likely to receive that
            many segments for connections in TIME-WAIT. */
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for TIME_WAITing connection.\n"));
 
-        //TODO Add firewall hook here?
         tcp_timewait_input(pcb);
         pbuf_free(p);
         return;
@@ -318,9 +336,16 @@ tcp_input(struct pbuf *p, struct netif *inp)
         TCP_STATS_INC(tcp.cachehit);
       }
 
+      // Make sure that firewall allows this packet
+      if(IP_IS_V4(ip_current_src_addr())){
+        if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
+            tcp_get_user_endp(lpcb), fw_flags) != LWIP_KEEP_PACKET) {
+          goto dropped;
+        }
+      }
+
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: packed for LISTENing connection.\n"));
 
-      //TODO Add firewall hook here? 
       tcp_listen_input(lpcb);
       pbuf_free(p);
       return;
@@ -339,13 +364,14 @@ tcp_input(struct pbuf *p, struct netif *inp)
 #if TCP_INPUT_DEBUG
     tcp_debug_print_state(pcb->state);
 #endif /* TCP_INPUT_DEBUG */
-
-    //TODO replace with hook to firewall
-    char src_addr[46], dest_addr[46];
-    ipaddr_ntoa_r(ip_current_src_addr(), src_addr, 46);
-    ipaddr_ntoa_r(ip_current_dest_addr(), dest_addr, 46);
-    printf("TCP packet going in. src: %s:%d, dst: %s:%d, endpoint: %d\n",
-            src_addr, tcphdr->src, dest_addr, tcphdr->dest, tcp_get_user_endp(pcb));
+ 
+    // Make sure that firewall allows this packet
+    if(IP_IS_V4(ip_current_src_addr())){
+      if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
+          tcp_get_user_endp(pcb), fw_flags) != LWIP_KEEP_PACKET) {
+        goto dropped;
+      }
+    }
 
     /* Set up a tcp_seg structure. */
     inseg.next = NULL;

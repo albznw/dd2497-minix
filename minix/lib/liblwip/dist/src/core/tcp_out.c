@@ -39,6 +39,7 @@
  */
 
 #include "lwip/opt.h"
+#include "lwip/firewall.h"
 
 #if LWIP_TCP /* don't build if not configured for use in lwipopts.h */
 
@@ -57,6 +58,9 @@
 #endif
 
 #include <string.h>
+
+/** Firewall syscall */
+#include <minix/fwdec.h>
 
 /* Define some copy-macros for checksum-on-copy so that the code looks
    nicer by preventing too many ifdef's. */
@@ -1192,12 +1196,13 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
   u16_t len;
   u32_t *opts;
 
-  //TODO replace with hook to firewall
-  char src_addr[46], dest_addr[46];
-  ipaddr_ntoa_r(&pcb->local_ip, src_addr, 46);
-  ipaddr_ntoa_r(&pcb->remote_ip, dest_addr, 46);
-  printf("TCP packet going out. src: %s:%d, dst: %s:%d, endpoint: %d\n",
-          src_addr, pcb->local_port, dest_addr, pcb->remote_port, tcp_get_user_endp(pcb));
+  // Make sure that firewall allows this packet
+  if(IP_IS_V4(&pcb->local_ip)){
+    if(tcp_fw_outgoing(ip_2_ip4(&pcb->local_ip), ip_2_ip4(&pcb->remote_ip), pcb->local_port, pcb->remote_port,
+        tcp_get_user_endp(pcb)) != LWIP_KEEP_PACKET) {
+      return ERR_OK;
+    }
+  }
 
   if (seg->p->ref != 1) {
     /* This can happen if the pbuf of this segment is still referenced by the
