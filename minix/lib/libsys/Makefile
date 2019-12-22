@@ -33,7 +33,7 @@ SRCS+=  \
 	kputc.c \
 	kputs.c \
 	mapdriver.c \
-	myserver.c \
+	fwtcp.c \
 	optset.c \
 	panic.c \
 	proceventmask.c \

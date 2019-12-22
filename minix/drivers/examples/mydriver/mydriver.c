@@ -8,7 +8,6 @@
 #include <include/arch/i386/include/archtypes.h>
 #include "kernel/proc.h"
 #include <minix/sysinfo.h>
-#include <minix/myserver.h>
 #include "servers/pm/mproc.h"
 
 /* SEF functions and variables. */
@@ -126,7 +125,6 @@ static int mydriver_open(devminor_t UNUSED(minor), int UNUSED(access),
   
   printf("mydriver_open(). Called %d time(s).\n", ++open_counter);
 
-  myserver_sys1();
   return OK;
 }
  

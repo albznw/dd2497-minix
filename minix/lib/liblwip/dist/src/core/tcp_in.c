@@ -79,6 +79,7 @@ static u32_t seqno, ackno;
 static tcpwnd_size_t recv_acked;
 static u16_t tcplen;
 static u8_t flags;
+static uint64_t fw_flags;
 
 static u8_t recv_flags;
 static struct pbuf *recv_data;
@@ -218,6 +219,11 @@ tcp_input(struct pbuf *p, struct netif *inp)
   tcphdr->wnd = lwip_ntohs(tcphdr->wnd);
 
   flags = TCPH_FLAGS(tcphdr);
+
+  if(flags & TCP_SYN) FWDEC_SET_TCP_SYN(fw_flags);
+  if(flags & TCP_ACK) FWDEC_SET_TCP_ACK(fw_flags);
+  if(flags & TCP_FIN) FWDEC_SET_TCP_FIN(fw_flags);
+
   tcplen = p->tot_len + ((flags & (TCP_FIN | TCP_SYN)) ? 1 : 0);
 
   /* Demultiplex an incoming segment. First, we check if it is destined
@@ -262,7 +268,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
         // Make sure that firewall allows this packet
         if(IP_IS_V4(ip_current_src_addr())){
           if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
-              tcp_get_user_endp(pcb)) != LWIP_KEEP_PACKET) {
+              tcp_get_user_endp(pcb), fw_flags) != LWIP_KEEP_PACKET) {
             goto dropped;
           }
         }
@@ -333,7 +339,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
       // Make sure that firewall allows this packet
       if(IP_IS_V4(ip_current_src_addr())){
         if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
-            tcp_get_user_endp(lpcb)) != LWIP_KEEP_PACKET) {
+            tcp_get_user_endp(lpcb), fw_flags) != LWIP_KEEP_PACKET) {
           goto dropped;
         }
       }
@@ -362,7 +368,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
     // Make sure that firewall allows this packet
     if(IP_IS_V4(ip_current_src_addr())){
       if(tcp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), tcphdr->src, tcphdr->dest,
-          tcp_get_user_endp(pcb)) != LWIP_KEEP_PACKET) {
+          tcp_get_user_endp(pcb), fw_flags) != LWIP_KEEP_PACKET) {
         goto dropped;
       }
     }

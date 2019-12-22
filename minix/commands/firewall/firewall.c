@@ -16,7 +16,7 @@ usage(void) {
 	fprintf(stderr,
 	    "usage:\t%s\n\t   %s\n\n%s\n",
 	    "firewall -ADL [-i 0-255] [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW]",
-	    "INC|OUT DROP|ACCEPT start_ip [end_ip]",
+	    "INC|OUT REJECT|ACCEPT start_ip [end_ip]",
         "For more information consult the manual using \"man firewall\"");
 	exit(1);
 }
@@ -144,12 +144,12 @@ main(int argc, char **argv) {
 
         // Parse action
         strncpy(action_str, argv[1], 7);
-        if(strncmp(action_str, "DROP", 7) == 0) {
+        if(strncmp(action_str, "REJECT", 7) == 0) {
             action = DROP_PACKET;
         } else if (strncmp(action_str, "ACCEPT", 7) == 0){
             action = ACCEPT_PACKET;
         } else {
-            fprintf(stderr, "Error: did not recognize action \"%s\". Should be either DROP or ACCEPT.\n\n",
+            fprintf(stderr, "Error: did not recognize action \"%s\". Should be either REJECT or ACCEPT.\n\n",
                             argv[1]);
             usage();
         }
@@ -167,7 +167,7 @@ main(int argc, char **argv) {
                 fprintf(stderr, "Error: Could not parse end ip \"%s\". Must be a valid ip address.\n\n", argv[3]);
                 usage();
             }
-            end_addr = htonl(end_addr);     
+            end_addr = htonl(end_addr);
         }
     } else if (argc < 3){
         fprintf(stderr, "Error: Too few arguments\n\n");

@@ -19,6 +19,8 @@
 #include <fcntl.h> //File handling flags
 #include <sys/time.h> //System time
 
+#include <minix/fwtcp.h>
+
 /* Declare local functions. */
 #ifdef FWDEC_DEBUG
 static void debug_log_packet(const int type, const int result, const uint32_t src_ip, const uint32_t dest_ip,
@@ -68,7 +70,6 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t *info)
  *===========================================================================*/
 
 int check_incoming_ip4(const uint32_t src_ip, const char *p_name) {
-  // Change NULL to incoming pname
   fw_rule *matched_rule = find_matching_rule(&in_rules, src_ip, p_name);
 
   if (matched_rule->action == FW_RULE_REJECT) {
@@ -81,7 +82,6 @@ int check_incoming_ip4(const uint32_t src_ip, const char *p_name) {
 }
 
 int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
-  // Change NULL to incoming pname
   fw_rule *matched_rule = find_matching_rule(&out_rules, dest_ip, p_name);
 
   if (matched_rule->action == FW_RULE_REJECT) {
@@ -91,6 +91,15 @@ int check_outgoing_ip4(const uint32_t dest_ip, const char *p_name) {
 
   log("Packet accepted\n");
   return LWIP_KEEP_PACKET; 
+}
+
+int check_incoming_tcp(const uint32_t src_ip, const char *p_name, uint64_t flags) {
+  // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
+  if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
+    log("Packet dropped\n");
+    return LWIP_DROP_PACKET;
+  }
+  return check_incoming_ip4(src_ip, p_name);
 }
 
 int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
@@ -139,8 +148,7 @@ int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
       result = check_outgoing_ip4(dest_ip, NULL);
       break;
     case FWDEC_QUERY_TCP_INC:
-      // TODO add TCP functions and logic
-      result = check_incoming_ip4(src_ip, p_name);
+      result = check_incoming_tcp(src_ip, p_name, flags);
       break;
     case FWDEC_QUERY_TCP_OUT:
       // TODO add TCP functions and logic

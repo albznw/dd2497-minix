@@ -32,7 +32,7 @@
  *   0x1800 - 0x18FF	Management Information Base (MIB) requests
  *   0x1900 - 0x19FF	Socket device requests and responses
  *   0x1A00 - 0x1AFF	Network device requests and responses
- *   0x1B00 - 0x1BFF	myserver, example server
+ *   0x1B00 - 0x1BFF	fwtcp, Firewall TCP decision server
  *   0x1C00 - 0x1CFF	fwdec, Firewall decision server
  *
  * Zero and negative values are widely used for OK and error responses.
@@ -69,7 +69,7 @@
 #define VM_PROC_NR   ((endpoint_t) 8)   /* memory server */
 #define PFS_PROC_NR  ((endpoint_t) 9)  /* pipe filesystem */
 #define MFS_PROC_NR  ((endpoint_t) 10)  /* minix root filesystem */
-#define MYSERVER_PROC_NR  ((endpoint_t) 11)  /* minix root filesystem */
+#define FWTCP_PROC_NR  ((endpoint_t) 11)  /* minix root filesystem */
 #define FWDEC_PROC_NR     ((endpoint_t) 12)  /* Firewall decision server */
 #define LAST_SPECIAL_PROC_NR	13	/* An untyped version for
                                            computation in macros.*/
@@ -1150,12 +1150,12 @@
 #  define NDEV_LINK_DOWN	2	/* link is down */
 
 /*===========================================================================*
- *			Messages for MYSERVER				     *
+ *			Messages for FWTCP				     *
  *===========================================================================*/
 
-#define MYSERVER_BASE 0x1B00
+#define FWTCP_BASE 0x1B00
 
-#define MYSERVER_SYS1		(MYSERVER_BASE + 0)	/* Syscall 1 */
+#define FWTCP_CHECK_PACKET	(FWTCP_BASE + 0)	/* Syscall 1 */
 
 /*===========================================================================*
 *		Messages for the firewall decision server		     *

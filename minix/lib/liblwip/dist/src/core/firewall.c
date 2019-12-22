@@ -20,9 +20,9 @@ int ip4_fw_outgoing(const ip4_addr_t *src, const ip4_addr_t *dest)
   return LWIP_KEEP_PACKET;
 }
 
-int tcp_fw_incoming(const ip4_addr_t *src, const ip4_addr_t *dest, int src_port, int dest_port, endpoint_t user_endp)
+int tcp_fw_incoming(const ip4_addr_t *src, const ip4_addr_t *dest, int src_port, int dest_port, endpoint_t user_endp, uint64_t flags)
 {
-  if (fwdec_query_packet(FWDEC_QUERY_TCP_INC, src->addr, dest->addr, user_endp, src_port, dest_port, 0) != LWIP_KEEP_PACKET) {
+  if (fwdec_query_packet(FWDEC_QUERY_TCP_INC, src->addr, dest->addr, user_endp, src_port, dest_port, flags) != LWIP_KEEP_PACKET) {
     return LWIP_DROP_PACKET;
   }
 

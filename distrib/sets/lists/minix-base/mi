@@ -290,7 +290,7 @@
 ./service/lwip                                          minix-base
 ./service/memory                                        minix-base
 ./service/mydriver                                      minix-base
-./service/myserver                                      minix-base
+./service/fwtcp                                         minix-base
 ./service/fwdec						minix-base
 ./service/decision					minix-base	obsolete
 ./service/mfs                                           minix-base
