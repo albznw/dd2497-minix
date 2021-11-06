@@ -4,6 +4,8 @@ DD2497 System Security Rroject with Minix
 
 ## Participants
 
-André Brogärd, brogard@kth.se
+André Brogärd, brogard@kth.se  
 Tommie Andersson tommiean@kth.se  
-Henrik Kultala, kultala@kth.se
+Henrik Kultala, kultala@kth.se  
+Albin Winkelmann, albinwi@kth.se  
+
