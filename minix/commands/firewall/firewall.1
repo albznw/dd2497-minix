@@ -1,0 +1,67 @@
+.Dd December 17, 2019
+.Dt firewall 1
+.Os
+.Sh NAME
+.Nm firewall
+.Nd user interface to the firewall
+.Sh SYNOPSIS
+.Nm
+.Fl ADL
+.Op Fl i Ar importance
+.Op Fl p Ar port
+.Op Fl n Ar pname
+.Op Fl t Ar type
+.Ar chain
+.Ar action
+.Oo
+.Ar start
+.Op Ar end
+.Oc
+.Sh DESCRIPTION
+The
+.Nm
+command
+allows user manipulation of the firewall rules on this host.
+.Pp
+Options:
+.Bl -tag -width indent
+.It Fl A
+Add a firewall rule.
+.It Fl D
+Delete a firewall rule.
+.It Fl L
+List all firewall rules.
+.It Fl i
+Optionally set the importance of the firewall rule.
+Accepted values are 0-255.
+Rules with higher importance value takes precedence.
+Default is 255.
+.It Fl p
+An optional specifier of the TCP/UDP port that should be blocked.
+e.g. 443.
+.It Fl n
+An optional specifier of the named process that should be blocked,
+e.g. "dig".
+.It Fl t
+Optionally target only a specific protocol type.
+May be either of IP, TCP, UDP, ICMP or RAW.
+Default is IP.
+.It Ar chain
+The chain of the target rule. Either INC for incoming traffic
+or OUT for outgoing traffic.
+.It Ar action
+What action should be taken for traffic matching the rule.
+One of either REJECT or ACCEPT.
+.It Ar start
+The starting IP address of this rules matching range,
+e.g. 192.168.0.1.
+.It Ar end
+The ending IP address of this rules matching range,
+e.g. 192.168.0.10.
+Will be the same as the
+.Ar start
+argument if not set.
+.Sh HISTORY
+The
+.Nm
+command added by Project Group 10 of DD2497 in 2019
