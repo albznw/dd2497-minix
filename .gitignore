@@ -1,1 +1,4 @@
 **/obj.i386
+**/*.img
+**/minix/external
+**/minix/gnu
