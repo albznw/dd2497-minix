@@ -162,9 +162,6 @@ void             udp_init       (void);
 /* for compatibility with older implementation */
 #define udp_new_ip6() udp_new_ip_type(IPADDR_TYPE_V6)
 
-#define udp_set_user_endp(pcb, value)          ((pcb)->user_endp = (value))
-#define udp_get_user_endp(pcb)                 ((pcb)->user_endp)
-
 #if LWIP_MULTICAST_TX_OPTIONS
 #if LWIP_IPV4
 #define udp_set_multicast_netif_addr(pcb, ip4addr) ip4_addr_copy((pcb)->mcast_ip4, *(ip4addr))

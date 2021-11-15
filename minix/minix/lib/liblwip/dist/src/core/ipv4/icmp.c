@@ -40,7 +40,6 @@
    is not implemented. */
 
 #include "lwip/opt.h"
-#include "lwip/firewall.h"
 
 #if LWIP_IPV4 && LWIP_ICMP /* don't build if not configured for use in lwipopts.h */
 
@@ -51,9 +50,6 @@
 #include "lwip/stats.h"
 
 #include <string.h>
-
-/** Firewall syscall */
-#include <minix/fwdec.h>
 
 #ifdef LWIP_HOOK_FILENAME
 #include LWIP_HOOK_FILENAME
@@ -84,7 +80,9 @@ void
 icmp_input(struct pbuf *p, struct netif *inp)
 {
   u8_t type;
+#ifdef LWIP_DEBUG
   u8_t code;
+#endif /* LWIP_DEBUG */
   struct icmp_echo_hdr *iecho;
   const struct ip_hdr *iphdr_in;
   u16_t hlen;
@@ -104,15 +102,10 @@ icmp_input(struct pbuf *p, struct netif *inp)
     goto lenerr;
   }
 
-  code = *(((u8_t *)p->payload)+1);
   type = *((u8_t *)p->payload);
-
-  // Make sure that firewall allows this packet
-  if(icmp_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr()) != LWIP_KEEP_PACKET) {
-    pbuf_free(p);
-    return;
-  }
-
+#ifdef LWIP_DEBUG
+  code = *(((u8_t *)p->payload)+1);
+#endif /* LWIP_DEBUG */
   switch (type) {
   case ICMP_ER:
     /* This is OK, echo reply might have been parsed by a raw PCB
@@ -240,12 +233,6 @@ icmp_input(struct pbuf *p, struct netif *inp)
       }
 #endif /* CHECKSUM_GEN_IP */
 
-      // Make sure that firewall allows this packet
-      if(icmp_fw_outgoing(ip4_current_dest_addr(), ip4_current_src_addr()) != LWIP_KEEP_PACKET) {
-        pbuf_free(p);
-        return;
-      }
-
       ICMP_STATS_INC(icmp.xmit);
       /* increase number of messages attempted to send */
       MIB2_STATS_INC(mib2.icmpoutmsgs);
@@ -349,7 +336,7 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
   struct ip_hdr *iphdr;
   /* we can use the echo header here */
   struct icmp_echo_hdr *icmphdr;
-  ip4_addr_t iphdr_src, iphdr_dest;
+  ip4_addr_t iphdr_src;
   struct netif *netif;
 
   /* increase number of messages attempted to send */
@@ -384,7 +371,6 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
           IP_HLEN + ICMP_DEST_UNREACH_DATASIZE);
 
   ip4_addr_copy(iphdr_src, iphdr->src);
-  ip4_addr_copy(iphdr_dest, iphdr->dest);
 #ifdef LWIP_HOOK_IP4_ROUTE_SRC
   {
     ip4_addr_t iphdr_dst;
@@ -402,14 +388,7 @@ icmp_send_response(struct pbuf *p, u8_t type, u8_t code)
       icmphdr->chksum = inet_chksum(icmphdr, q->len);
     }
 #endif
-    // Make sure that firewall allows this packet
-    if(icmp_fw_outgoing(&iphdr_src, &iphdr_dest) != LWIP_KEEP_PACKET) {
-      pbuf_free(q);
-      return;
-    }
-
     ICMP_STATS_INC(icmp.xmit);
-
     ip4_output_if(q, NULL, &iphdr_src, ICMP_TTL, 0, IP_PROTO_ICMP, netif);
   }
   pbuf_free(q);

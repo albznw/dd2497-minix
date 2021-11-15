@@ -195,12 +195,9 @@
 ./etc/system.conf                                       minix-base
 ./etc/system.conf.d                                     minix-base
 ./etc/system.conf.d/hello                               minix-base
-./etc/system.conf.d/groupNames				minix-base      obsolete
-./etc/system.conf.d/group-names				minix-base
 ./etc/system.conf.d/inet                                minix-base      obsolete
 ./etc/system.conf.d/ipc                                 minix-base
 ./etc/system.conf.d/lwip                                minix-base
-./etc/system.conf.d/mydriver                            minix-base
 ./etc/system.conf.d/random                              minix-base
 ./etc/system.conf.d/uds                                 minix-base
 ./etc/system.conf.d/usb_hub                             minix-base
@@ -273,14 +270,10 @@
 ./sbin/sysctl                                           minix-base
 ./service                                               minix-base
 ./service/asr                                           minix-base
-./service/decision					minix-base	obsolete
 ./service/devman                                        minix-base
 ./service/ds                                            minix-base
 ./service/ext2                                          minix-base
 ./service/hello                                         minix-base
-./service/fwdec
-./service/groupNames                                    minix-base      obsolete
-./service/group-names                                   minix-base
 ./service/inet                                          minix-base      obsolete
 ./service/input                                         minix-base
 ./service/ipc                                           minix-base
@@ -289,10 +282,6 @@
 ./service/log                                           minix-base
 ./service/lwip                                          minix-base
 ./service/memory                                        minix-base
-./service/mydriver                                      minix-base
-./service/fwtcp                                         minix-base
-./service/fwdec						minix-base
-./service/decision					minix-base	obsolete
 ./service/mfs                                           minix-base
 ./service/mib                                           minix-base
 ./service/pfs                                           minix-base
@@ -583,7 +572,6 @@
 ./usr/bin/sum                                           minix-base
 ./usr/bin/svclog                                        minix-base      obsolete
 ./usr/bin/svrctl                                        minix-base
-./usr/bin/firewall                                      minix-base
 ./usr/bin/swifi                                         minix-base
 ./usr/bin/synctree                                      minix-base
 ./usr/bin/sz                                            minix-base
@@ -3312,11 +3300,9 @@
 ./usr/share/nvi/catalog/ru_RU.KOI8-R                    minix-base
 ./usr/share/nvi/catalog/spanish                         minix-base
 ./usr/share/nvi/catalog/swedish                         minix-base
-./usr/share/shellcode.txt				minix-base      obsolete
 ./usr/share/terminfo                                    minix-base
 ./usr/share/terminfo/terminfo                           minix-base
 ./usr/share/terminfo/terminfo.cdb                       minix-base
-./usr/share/test.txt					minix-base	obsolete
 ./usr/share/zoneinfo                                    minix-base
 ./usr/share/zoneinfo/Africa                             minix-base
 ./usr/share/zoneinfo/Africa/Abidjan                     minix-base

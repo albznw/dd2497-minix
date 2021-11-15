@@ -9,7 +9,7 @@ SUBDIR=	at backup \
 	DESCRIBE devmand devsize \
 	dhrystone \
 	eject \
-	firewall fix format fsck.mfs \
+	fix format fsck.mfs \
 	gcov-pull \
 	ifdef \
 	intr isoread \

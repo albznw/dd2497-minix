@@ -15,8 +15,7 @@ SRCS+=	\
 	tcp_in.c \
 	tcp_out.c \
 	timeouts.c \
-	udp.c \
-	firewall.c
+	udp.c
 
 SRCS+=	\
 	icmp.c \

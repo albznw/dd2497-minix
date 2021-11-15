@@ -1203,7 +1203,6 @@
 ./usr/include/minix/fb.h                                minix-comp
 ./usr/include/minix/fsdriver.h                          minix-comp
 ./usr/include/minix/fslib.h                             minix-comp
-./usr/include/minix/fwdec.h				minix-comp
 ./usr/include/minix/gcov.h                              minix-comp
 ./usr/include/minix/gpio.h                              minix-comp
 ./usr/include/minix/hash.h                              minix-comp
@@ -1222,7 +1221,6 @@
 ./usr/include/minix/log.h                               minix-comp
 ./usr/include/minix/minlib.h                            minix-comp
 ./usr/include/minix/mmio.h                              minix-comp
-./usr/include/minix/fwtcp.h                             minix-comp
 ./usr/include/minix/mthread.h                           minix-comp
 ./usr/include/minix/netdriver.h                         minix-comp
 ./usr/include/minix/netsock.h                           minix-comp      obsolete
@@ -1750,7 +1748,6 @@
 ./usr/include/sys/stdbool.h                             minix-comp
 ./usr/include/sys/stdint.h                              minix-comp
 ./usr/include/sys/svrctl.h                              minix-comp
-./usr/include/sys/fwctl.h                               minix-comp
 ./usr/include/sys/swap.h                                minix-comp
 ./usr/include/sys/syncobj.h                             minix-comp
 ./usr/include/sys/syscall.h                             minix-comp

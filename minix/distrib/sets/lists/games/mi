@@ -21,7 +21,7 @@
 ./usr/games/countmail				games-utils-bin
 ./usr/games/cribbage				games-games-bin
 ./usr/games/dab					games-games-bin		cxx
-./usr/games/demo01                              games-games-bin
+./usr/games/demo01				games-games-bin
 ./usr/games/dm					games-games-bin
 ./usr/games/factor				games-utils-bin
 ./usr/games/fish				games-games-bin
@@ -70,7 +70,6 @@
 ./usr/games/monop				games-games-bin
 ./usr/games/morse				games-games-bin
 ./usr/games/number				games-utils-bin
-./usr/games/overflow				games-games-bin		obsolete
 ./usr/games/phantasia				games-games-bin
 ./usr/games/pig					games-games-bin
 ./usr/games/pom					games-games-bin

@@ -288,7 +288,7 @@ rawsock_input(void * arg, struct raw_pcb * pcb __unused, struct pbuf * psrc,
  */
 sockid_t
 rawsock_socket(int domain, int protocol, struct sock ** sockp,
-	const struct sockevent_ops ** ops, endpoint_t user_endpt)
+	const struct sockevent_ops ** ops)
 {
 	struct rawsock *raw;
 	unsigned int flags;
@@ -313,7 +313,6 @@ rawsock_socket(int domain, int protocol, struct sock ** sockp,
 	/* We should have enough PCBs so this call should not fail.. */
 	if ((raw->raw_pcb = raw_new_ip_type(ip_type, protocol)) == NULL)
 		return ENOBUFS;
-	raw_set_user_endp(raw->raw_pcb, user_endpt);
 	raw_recv(raw->raw_pcb, rawsock_input, (void *)raw);
 
 	/* By default, the multicast TTL is 1 and looping is enabled. */

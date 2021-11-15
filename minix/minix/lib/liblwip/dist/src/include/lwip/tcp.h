@@ -424,9 +424,6 @@ const char* tcp_debug_state_str(enum tcp_state s);
 /* for compatibility with older implementation */
 #define tcp_new_ip6() tcp_new_ip_type(IPADDR_TYPE_V6)
 
-#define tcp_set_user_endp(pcb, value)          ((pcb)->user_endp = (value))
-#define tcp_get_user_endp(pcb)                 ((pcb)->user_endp)
-
 #ifdef __cplusplus
 }
 #endif

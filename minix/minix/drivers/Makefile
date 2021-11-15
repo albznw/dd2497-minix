@@ -14,7 +14,6 @@ SUBDIR+=	system
 SUBDIR+=	usb
 SUBDIR+=	video
 SUBDIR+=	vmm_guest
-SUBDIR+= 	group-names
 .endif # ${MKIMAGEONLY} == "no"
 
 # The following folders contain drivers which are always required

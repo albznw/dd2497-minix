@@ -36,7 +36,7 @@
 #define LOG_MAJOR		  15	/* 15 = /dev/klog   (log driver)      */
 #define RANDOM_MAJOR		  16	/* 16 = /dev/random (random driver)   */
 #define HELLO_MAJOR		  17	/* 17 = /dev/hello  (hello driver)    */
-#define MYDRIVER_MAJOR		  18	/* 18 = /dev/mydriver  (mydriver driver)    */
+					/* 18 = (unused)                      */
 #define FB_MAJOR		  19	/* 19 = /dev/fb0    (fb driver)       */
 #define I2C0_MAJOR		  20	/* 20 = /dev/i2c-1  (i2c-dev)         */
 #define I2C1_MAJOR		  21	/* 21 = /dev/i2c-2  (i2c-dev)         */
@@ -78,10 +78,8 @@
 #define INPUT_MAJOR		  64	/* 64 = /dev/input (input)            */
 #define USB_BASE_MAJOR		  65	/* 65-133 = USB major range	      */
 #define PCI_MAJOR		 134	/* 134 = /dev/pci (pci)            */
-#define GROUPNAME_MAJOR		 135    /* 135 = /dev/group-names (group-names driver) */
 
-#define NR_DEVICES   		 136	/* number of (major) devices */
-
+#define NR_DEVICES   		 135	/* number of (major) devices */
 
 /* Minor device numbers for memory driver. */
 #  define RAM_DEV_OLD  		   0	/* minor device for /dev/ram */

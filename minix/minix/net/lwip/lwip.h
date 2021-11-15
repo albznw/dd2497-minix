@@ -91,17 +91,17 @@ int addrpol_get_scope(const ip_addr_t * ipaddr, int is_src);
 /* tcpsock.c */
 void tcpsock_init(void);
 sockid_t tcpsock_socket(int domain, int protocol, struct sock ** sock,
-	const struct sockevent_ops ** ops, endpoint_t user_endpt);
+	const struct sockevent_ops ** ops);
 
 /* udpsock.c */
 void udpsock_init(void);
 sockid_t udpsock_socket(int domain, int protocol, struct sock ** sock,
-	const struct sockevent_ops ** ops, endpoint_t user_endpt);
+	const struct sockevent_ops ** ops);
 
 /* rawsock.c */
 void rawsock_init(void);
 sockid_t rawsock_socket(int domain, int protocol, struct sock ** sock,
-	const struct sockevent_ops ** ops, endpoint_t user_endpt);
+	const struct sockevent_ops ** ops);
 
 /* loopif.c */
 void loopif_init(void);

@@ -22,7 +22,7 @@
  *    0xE00 -  0xEFF	Common system messages (e.g. system signals)
  *    0xF00 -  0xFFF	Scheduling messages
  *   0x1000 - 0x10FF	Notify messages
- *   0x1100 - 0x11FF	USB
+ *   0x1100 - 0x11FF	USB  
  *   0x1200 - 0x12FF	Devman
  *   0x1300 - 0x13FF	TTY requests
  *   0x1400 - 0x14FF	Real Time Clock requests and responses
@@ -32,14 +32,12 @@
  *   0x1800 - 0x18FF	Management Information Base (MIB) requests
  *   0x1900 - 0x19FF	Socket device requests and responses
  *   0x1A00 - 0x1AFF	Network device requests and responses
- *   0x1B00 - 0x1BFF	fwtcp, Firewall TCP decision server
- *   0x1C00 - 0x1CFF	fwdec, Firewall decision server
  *
  * Zero and negative values are widely used for OK and error responses.
  */
 
 #ifndef _MINIX_COM_H
-#define _MINIX_COM_H
+#define _MINIX_COM_H 
 
 /*===========================================================================*
  *            	Process numbers of processes in the system image	     *
@@ -55,7 +53,7 @@
 
 /* Number of tasks. Note that NR_PROCS is defined in <minix/config.h>. */
 #define MAX_NR_TASKS	1023
-#define NR_TASKS	  5
+#define NR_TASKS	  5 
 
 /* User-space processes, that is, device drivers, servers, and INIT. */
 #define PM_PROC_NR   ((endpoint_t) 0)	/* process manager */
@@ -69,9 +67,7 @@
 #define VM_PROC_NR   ((endpoint_t) 8)   /* memory server */
 #define PFS_PROC_NR  ((endpoint_t) 9)  /* pipe filesystem */
 #define MFS_PROC_NR  ((endpoint_t) 10)  /* minix root filesystem */
-#define FWTCP_PROC_NR  ((endpoint_t) 11)  /* minix root filesystem */
-#define FWDEC_PROC_NR     ((endpoint_t) 12)  /* Firewall decision server */
-#define LAST_SPECIAL_PROC_NR	13	/* An untyped version for
+#define LAST_SPECIAL_PROC_NR	11	/* An untyped version for
                                            computation in macros.*/
 #define INIT_PROC_NR ((endpoint_t) LAST_SPECIAL_PROC_NR)  /* init
                                                         -- goes multiuser */
@@ -89,7 +85,7 @@
  * so make sure that these types do not interfere with other message types.
  * Notifications are prioritized because of the way they are unhold() and
  * blocking notifications are delivered. The lowest numbers go first. The
- * offset are used for the per-process notification bit maps.
+ * offset are used for the per-process notification bit maps. 
  */
 #define NOTIFY_MESSAGE		  0x1000
 /* FIXME the old is_notify(a) should be replaced by is_ipc_notify(status). */
@@ -153,7 +149,7 @@
 							 * driver (safecopy)
 							 */
 #define BUSC_PCI_DEL_ACL	(BUSC_RQ_BASE + 18)	/* Delete the ACL of a
-							 * driver
+							 * driver 
 							 */
 #define BUSC_PCI_GET_BAR	(BUSC_RQ_BASE + 19)	/* Get Base Address
 							 * Register properties
@@ -170,8 +166,8 @@
  *===========================================================================*/
 
 /* Base type for data link layer requests and responses. */
-#define DL_RQ_BASE	0x200
-#define DL_RS_BASE	0x280
+#define DL_RQ_BASE	0x200		
+#define DL_RS_BASE	0x280		
 
 #define IS_DL_RQ(type) (((type) & ~0x7f) == DL_RQ_BASE)
 #define IS_DL_RS(type) (((type) & ~0x7f) == DL_RS_BASE)
@@ -202,11 +198,11 @@
  *                  SYSTASK request types and field names                    *
  *===========================================================================*/
 
-/* System library calls are dispatched via a call vector, so be careful when
+/* System library calls are dispatched via a call vector, so be careful when 
  * modifying the system call numbers. The numbers here determine which call
  * is made from the call vector.
- */
-#define KERNEL_CALL	0x600	/* base for kernel calls to SYSTEM */
+ */ 
+#define KERNEL_CALL	0x600	/* base for kernel calls to SYSTEM */ 
 
 #  define SYS_FORK       (KERNEL_CALL + 0)	/* sys_fork() */
 #  define SYS_EXEC       (KERNEL_CALL + 1)	/* sys_exec() */
@@ -246,7 +242,7 @@
 #  define SYS_SETGRANT   (KERNEL_CALL + 34)	/* sys_setgrant() */
 #  define SYS_READBIOS   (KERNEL_CALL + 35)	/* sys_readbios() */
 
-#  define SYS_SPROF      (KERNEL_CALL + 36)     /* sys_sprof() */
+#  define SYS_SPROF      (KERNEL_CALL + 36)     /* sys_sprof() */ 
 
 #  define SYS_STIME      (KERNEL_CALL + 39)	/* sys_stime() */
 #  define SYS_SETTIME    (KERNEL_CALL + 40)	/* sys_settime() */
@@ -310,7 +306,7 @@
 #  define IRQ_ENABLE        3	/* enable interrupts */
 #  define IRQ_DISABLE       4	/* disable interrupts */
 #  define IRQ_REENABLE  0x001	/* reenable IRQ line after interrupt */
-#  define IRQ_BYTE      0x100	/* byte values */
+#  define IRQ_BYTE      0x100	/* byte values */      
 #  define IRQ_WORD      0x200	/* word values */
 #  define IRQ_LONG      0x400	/* long values */
 
@@ -450,9 +446,9 @@
 #define SYS_STATE_CLEAR_IPC_FILTERS 5	/* clear IPC filters */
 
 /* Subfunctions for SYS_SCHEDCTL */
-#  define SCHEDCTL_FLAG_KERNEL	1	/* mark kernel scheduler and remove
-					 * RTS_NO_QUANTUM; otherwise caller is
-					 * marked scheduler
+#  define SCHEDCTL_FLAG_KERNEL	1	/* mark kernel scheduler and remove 
+					 * RTS_NO_QUANTUM; otherwise caller is 
+					 * marked scheduler 
 					 */
 
 /* Field names for SYS_PADCONF */
@@ -768,10 +764,9 @@
 #define VM_GETRUSAGE		(VM_RQ_BASE+47)
 
 #define VM_RS_PREPARE		(VM_RQ_BASE+48)
-#define VM_PT_DEBUG		(VM_RQ_BASE+49)
 
 /* Total. */
-#define NR_VM_CALLS				50
+#define NR_VM_CALLS				49
 #define VM_CALL_MASK_SIZE			BITMAP_CHUNKS(NR_VM_CALLS)
 
 /* not handled as a normal VM call, thus at the end of the reserved rage */
@@ -1148,55 +1143,6 @@
 #  define NDEV_LINK_UNKNOWN	0	/* link status is unknown, assume up */
 #  define NDEV_LINK_UP		1	/* link is up */
 #  define NDEV_LINK_DOWN	2	/* link is down */
-
-/*===========================================================================*
- *			Messages for FWTCP				     *
- *===========================================================================*/
-
-#define FWTCP_BASE 0x1B00
-
-#define FWTCP_CHECK_PACKET	(FWTCP_BASE + 0)	/* Syscall 1 */
-
-/*===========================================================================*
-*		Messages for the firewall decision server		     *
-*============================================================================*/
-
-#define FWDEC_BASE 0X1C00
-
-#define FWDEC_QUERY_IP4_INC  (FWDEC_BASE + 0) /* Drop IPv4 packet or not (incoming) */
-#define FWDEC_QUERY_IP4_OUT  (FWDEC_BASE + 1) /* Drop IPv4 packet or not (outgoing) */
-#define FWDEC_QUERY_TCP_INC  (FWDEC_BASE + 2) /* Drop TCP packet or not (incoming) */
-#define FWDEC_QUERY_TCP_OUT  (FWDEC_BASE + 3) /* Drop TCP packet or not (outgoing) */
-#define FWDEC_QUERY_UDP_INC  (FWDEC_BASE + 4) /* Drop UDP packet or not (incoming) */
-#define FWDEC_QUERY_UDP_OUT  (FWDEC_BASE + 5) /* Drop UDP packet or not (outgoing) */
-#define FWDEC_QUERY_RAW_INC  (FWDEC_BASE + 6) /* Drop RAW packet or not (incoming) */
-#define FWDEC_QUERY_RAW_OUT  (FWDEC_BASE + 7) /* Drop RAW packet or not (outgoing) */
-#define FWDEC_QUERY_ICMP_INC (FWDEC_BASE + 8) /* Drop ICMP packet or not (incoming) */
-#define FWDEC_QUERY_ICMP_OUT (FWDEC_BASE + 9) /* Drop ICMP packet or not (outgoing) */
-
-#define FWDEC_ADD_RULE (FWDEC_BASE + 10) /* Add firewall rule */
-#define FWDEC_DEL_RULE (FWDEC_BASE + 11) /* Delete firewall rule */
-#define FWDEC_LIST_RULES (FWDEC_BASE + 12) /* List all firewall rules */
-
-/* Packet specific flags */
-#define FWDEC_SET_TCP_SYN(flags) (flags |= (1 << 0))
-#define FWDEC_GET_TCP_SYN(flags) (flags & (1 << 0))
-#define FWDEC_SET_TCP_ACK(flags) (flags |= (1 << 1))
-#define FWDEC_GET_TCP_ACK(flags) (flags & (1 << 1))
-#define FWDEC_SET_TCP_FIN(flags) (flags |= (1 << 2))
-#define FWDEC_GET_TCP_FIN(flags) (flags & (1 << 2))
-
-#define FWDEC_ADD_RULE (FWDEC_BASE + 2)
-#define FWDEC_REMOVE_RULE (FWDEC_BASE + 3)
-
-/*===========================================================================*
-*		Messages for the LWIP server		     *
-*============================================================================*/
-
-#define LWIP_BASE 0X1D00
-
-#define LWIP_KEEP_PACKET 	(LWIP_BASE + 0)	/* Do not drop the packet */
-#define LWIP_DROP_PACKET 	(LWIP_BASE + 1)	/* Drop the packet */
 
 /*===========================================================================*
  *		Internal codes used by several services			     *

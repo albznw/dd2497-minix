@@ -110,9 +110,7 @@ ipaddr_aton(const char *cp, ip_addr_t *addr)
 err_t
 ip_input(struct pbuf *p, struct netif *inp)
 {
-  //Forward packet to ipv4 or ipv6
   if (p != NULL) {
-	
     if (IP_HDR_GET_VERSION(p->payload) == 6) {
       return ip6_input(p, inp);
     }

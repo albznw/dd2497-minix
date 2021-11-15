@@ -4,6 +4,4 @@
 PROG=	demo01			# Name of the program
 MAN=				# No man page
 
-LDADD+= 			# Additional libraries
-
 .include <bsd.prog.mk>		# This is a program, not a library

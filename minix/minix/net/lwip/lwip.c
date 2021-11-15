@@ -152,8 +152,7 @@ static sockid_t
 alloc_socket(int domain, int type, int protocol, endpoint_t user_endpt,
 	struct sock ** sock, const struct sockevent_ops **ops)
 {
-	// WIP
-	//printf("User endpoint: %d\n", util_get_process(user_endpt));
+
 	switch (domain) {
 	case PF_INET:
 #ifdef INET6
@@ -161,30 +160,25 @@ alloc_socket(int domain, int type, int protocol, endpoint_t user_endpt,
 #endif /* INET6 */
 		switch (type) {
 		case SOCK_STREAM:
-			//printf("TCP Socket\n");
-			return tcpsock_socket(domain, protocol, sock, ops, user_endpt);
+			return tcpsock_socket(domain, protocol, sock, ops);
 
 		case SOCK_DGRAM:
-			//printf("UDP Socket\n");
-			return udpsock_socket(domain, protocol, sock, ops, user_endpt);
+			return udpsock_socket(domain, protocol, sock, ops);
 
 		case SOCK_RAW:
-			//printf("RAW Socket\n");
 			if (!util_is_root(user_endpt))
 				return EACCES;
 
-			return rawsock_socket(domain, protocol, sock, ops, user_endpt);
+			return rawsock_socket(domain, protocol, sock, ops);
 
 		default:
 			return EPROTOTYPE;
 		}
 
 	case PF_ROUTE:
-		//printf("RT Socket\n");
 		return rtsock_socket(type, protocol, sock, ops);
 
 	case PF_LINK:
-		//printf("LINK Socket\n");
 		return lnksock_socket(type, protocol, sock, ops);
 
 	default:

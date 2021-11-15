@@ -221,35 +221,6 @@ typedef struct {
 _ASSERT_MSG_SIZE(mess_fs_vfs_readwrite);
 
 typedef struct {
-	endpoint_t user_endp; /* User level endpoint */
-
-	uint32_t src_ip; /* Source IPv4 address */
-	uint32_t dest_ip; /* Destination IPv4 address */
-
-	uint16_t src_port; /* Source Port*/
-	uint16_t dest_port;	/* Destination Port*/
-
-	uint64_t flags; /* Optional flags */
-	
-	uint8_t padding[32];
-} mess_fwdec_ip4;
-_ASSERT_MSG_SIZE(mess_fwdec_ip4);
-
-typedef struct {
-	uint32_t method;
-	uint8_t direction;
-	uint8_t type;
-	uint8_t priority;
-	uint8_t action;
-	uint32_t ip_start;
-	uint32_t ip_end;
-	uint16_t port;
-	char p_name[16];
-	uint8_t padding[22];
-} mess_fwdec_rule;
-_ASSERT_MSG_SIZE(mess_fwdec_rule);
-
-typedef struct {
 	uint8_t padding[56];
 } mess_i2c_li2cdriver_busc_i2c_exec;
 _ASSERT_MSG_SIZE(mess_i2c_li2cdriver_busc_i2c_exec);
@@ -1435,13 +1406,6 @@ typedef struct {
 _ASSERT_MSG_SIZE(mess_lsys_pm_getepinfo);
 
 typedef struct {
-	endpoint_t endpt;
-
-	uint8_t padding[52];
-} mess_lsys_pm_getepname;
-_ASSERT_MSG_SIZE(mess_lsys_pm_getepname);
-
-typedef struct {
 	pid_t pid;
 
 	uint8_t padding[52];
@@ -1832,13 +1796,6 @@ typedef struct {
 	uint8_t padding[36];
 } mess_pm_lsys_getepinfo;
 _ASSERT_MSG_SIZE(mess_pm_lsys_getepinfo);
-
-typedef struct {
-	char proc_name[PROC_NAME_LEN];
-
-	uint8_t padding[56 - PROC_NAME_LEN];
-} mess_pm_lsys_getepname;
-_ASSERT_MSG_SIZE(mess_pm_lsys_getepname);
 
 typedef struct {
 	endpoint_t endpt;
@@ -2472,8 +2429,6 @@ typedef struct noxfer_message {
 		mess_fs_vfs_rdlink	m_fs_vfs_rdlink;
 		mess_fs_vfs_readsuper	m_fs_vfs_readsuper;
 		mess_fs_vfs_readwrite	m_fs_vfs_readwrite;
-		mess_fwdec_ip4 m_fwdec_ip4;
-		mess_fwdec_rule m_fwdec_rule;
 		mess_i2c_li2cdriver_busc_i2c_exec m_i2c_li2cdriver_busc_i2c_exec;
 		mess_i2c_li2cdriver_busc_i2c_reserve m_i2c_li2cdriver_busc_i2c_reserve;
 		mess_input_linputdriver_input_conf m_input_linputdriver_input_conf;
@@ -2607,7 +2562,6 @@ typedef struct noxfer_message {
 		mess_lsys_mib_reply	m_lsys_mib_reply;
 		mess_lsys_pci_busc_get_bar m_lsys_pci_busc_get_bar;
 		mess_lsys_pm_getepinfo	m_lsys_pm_getepinfo;
-		mess_lsys_pm_getepname	m_lsys_pm_getepname;
 		mess_lsys_pm_getprocnr	m_lsys_pm_getprocnr;
 		mess_lsys_pm_proceventmask m_lsys_pm_proceventmask;
 		mess_lsys_pm_srv_fork	m_lsys_pm_srv_fork;
@@ -2652,7 +2606,6 @@ typedef struct noxfer_message {
 		mess_pm_lc_wait4	m_pm_lc_wait4;
 		mess_pm_lexec_exec_new	m_pm_lexec_exec_new;
 		mess_pm_lsys_getepinfo	m_pm_lsys_getepinfo;
-		mess_pm_lsys_getepname	m_pm_lsys_getepname;
 		mess_pm_lsys_getprocnr	m_pm_lsys_getprocnr;
 		mess_pm_lsys_proc_event	m_pm_lsys_proc_event;
 		mess_pm_lsys_sigs_signal m_pm_lsys_sigs_signal;

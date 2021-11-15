@@ -133,15 +133,6 @@ util_is_root(endpoint_t endpt)
 }
 
 /*
- * Return the process id associated with the endpoint
- */
-int
-util_get_process(endpoint_t endpt)
-{
-	return getnpid(endpt);
-}
-
-/*
  * Convert a lwIP-provided error code (of type err_t) to a negative MINIX 3
  * error code.
  */

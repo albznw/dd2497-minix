@@ -366,7 +366,6 @@
 ./usr/man/man1/suspend.1                                minix-man
 ./usr/man/man1/svc.1                                    minix-man       obsolete
 ./usr/man/man1/svrctl.1                                 minix-man
-./usr/man/man1/firewall.1                               minix-man
 ./usr/man/man1/synctree.1                               minix-man
 ./usr/man/man1/sysenv.1                                 minix-man
 ./usr/man/man1/sz.1                                     minix-man

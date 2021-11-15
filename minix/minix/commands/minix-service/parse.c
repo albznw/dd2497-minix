@@ -754,7 +754,6 @@ struct
 	{ "VFS_REPLY",		VM_VFS_REPLY },
 	{ "GETRUSAGE",		VM_GETRUSAGE },
 	{ "RS_PREPARE",		VM_RS_PREPARE },
-	{ "PT_DEBUG",		VM_PT_DEBUG },
 	{ NULL,			0 },
 };
 

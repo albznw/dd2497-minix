@@ -46,7 +46,6 @@
  */
 
 #include "lwip/opt.h"
-#include "lwip/firewall.h"
 
 #if LWIP_RAW /* don't build if not configured for use in lwipopts.h */
 
@@ -61,9 +60,6 @@
 #include "lwip/inet_chksum.h"
 
 #include <string.h>
-
-/** Firewall syscall */
-#include <minix/fwdec.h>
 
 /** The list of RAW PCBs */
 static struct raw_pcb *raw_pcbs;
@@ -172,15 +168,6 @@ raw_input(struct pbuf *p, struct netif *inp)
         /* the receive callback function did not eat the packet? */
         eaten = pcb->recv(pcb->recv_arg, pcb, p, ip_current_src_addr());
         if (eaten != 0) {
-
-          // Make sure that firewall allows this packet
-          if(IP_IS_V4(ip_current_src_addr())){
-            if(raw_fw_incoming(ip4_current_src_addr(), ip4_current_dest_addr(), raw_get_user_endp(pcb)) 
-                != LWIP_KEEP_PACKET) {
-              break;
-            }
-          }
-
           /* receive function ate the packet */
           p = NULL;
           eaten = 1;
@@ -405,13 +392,6 @@ raw_sendto_if_src(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
   if ((pcb == NULL) || (dst_ip == NULL) || (netif == NULL) || (src_ip == NULL) ||
       !IP_ADDR_PCB_VERSION_MATCH(pcb, src_ip) || !IP_ADDR_PCB_VERSION_MATCH(pcb, dst_ip)) {
     return ERR_VAL;
-  }
-
-  // Make sure that firewall allows this packet
-  if(IP_IS_V4(dst_ip)){
-    if(raw_fw_outgoing(ip_2_ip4(src_ip), ip_2_ip4(dst_ip), raw_get_user_endp(pcb)) != LWIP_KEEP_PACKET) {
-      return ERR_OK;
-    }
   }
 
   header_size = (

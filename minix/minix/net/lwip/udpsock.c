@@ -114,7 +114,7 @@ udpsock_input(void * arg, struct udp_pcb * pcb __unused, struct pbuf * pbuf,
  */
 sockid_t
 udpsock_socket(int domain, int protocol, struct sock ** sockp,
-	const struct sockevent_ops ** ops, endpoint_t user_endpt)
+	const struct sockevent_ops ** ops)
 {
 	struct udpsock *udp;
 	unsigned int flags;
@@ -141,10 +141,6 @@ udpsock_socket(int domain, int protocol, struct sock ** sockp,
 	/* We should have enough PCBs so this call should not fail.. */
 	if ((udp->udp_pcb = udp_new_ip_type(ip_type)) == NULL)
 		return ENOBUFS;
-
-	/* Save the user endpoint in the PCB to allow packet filtering */
-	udp_set_user_endp(udp->udp_pcb, user_endpt);
-
 	udp_recv(udp->udp_pcb, udpsock_input, (void *)udp);
 
 	/* By default, the multicast TTL is 1 and looping is enabled. */

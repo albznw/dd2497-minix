@@ -4,23 +4,6 @@
 
 #include <sys/socket.h>
 
-int
-getepname(endpoint_t proc_ep, char * buf, int buf_len)
-{
-	message m;
-	int r;
-
-	memset(&m, 0, sizeof(m));
-	m.m_lsys_pm_getepname.endpt = proc_ep;
-
-	if ((r = _taskcall(PM_PROC_NR, PM_GETEPNAME, &m)) < 0)
-		return r;
-
-	strncpy(buf, m.m_pm_lsys_getepname.proc_name, buf_len);
-
-	return OK;
-}
-
 pid_t
 getepinfo(endpoint_t proc_ep, uid_t *uid, gid_t *gid)
 {
