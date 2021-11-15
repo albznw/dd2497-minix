@@ -1,9 +1,5 @@
-C_HERE=${NETBSDSRCDIR}/minix/lib/libc/arch/${ARCHSUBDIR}
-.PATH: ${C_HERE}
+#	$NetBSD: Makefile.inc,v 1.21 2015/07/15 14:27:49 pooka Exp $
 
-SRCS+=	_cpuid.S	\
-	get_bp.S 	\
-	getprocessor.S	\
-	read_tsc.S	\
-	_cpufeature.c
-
+.if ${RUMPRUN} != "yes" && !defined(__MINIX)
+SRCS+=	__sigaction14_sigtramp.c __sigtramp2.S
+.endif

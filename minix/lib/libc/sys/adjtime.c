@@ -1,38 +1,94 @@
+/*	$NetBSD: adjtime.c,v 1.12 2011/10/15 23:00:02 christos Exp $ */
+
+/*
+ * Copyright (c) 2001 The NetBSD Foundation, Inc.      
+ * All rights reserved.
+ *
+ * This code is derived from software contributed to The NetBSD Foundation
+ * by Emmanuel Dreyfus.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #include <sys/cdefs.h>
-#include <lib.h>
+#if defined(LIBC_SCCS) && !defined(lint)
+__RCSID("$NetBSD: adjtime.c,v 1.12 2011/10/15 23:00:02 christos Exp $");
+#endif /* LIBC_SCCS and not lint */
+
 #include "namespace.h"
-
-#include <string.h>
-#include <sys/time.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <paths.h>
+#include <unistd.h>
 #include <time.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/syscall.h>
 
-#ifdef __weak_alias
-__weak_alias(adjtime, __adjtime50);
-#endif
+#include <sys/clockctl.h>
+ 
+extern int __clockctl_fd;
 
-int adjtime(const struct timeval *delta, struct timeval *olddelta)
+int ____adjtime50(const struct timeval *, struct timeval *);
+
+int
+adjtime(const struct timeval *delta, struct timeval *olddelta)
 {
-  message m;
+	struct clockctl_adjtime args;
+	int rv;
 
-  memset(&m, 0, sizeof(m));
-  m.m_lc_pm_time.clk_id = CLOCK_REALTIME;
-  m.m_lc_pm_time.now = 0; /* use adjtime() method to slowly adjust the clock. */
-  m.m_lc_pm_time.sec = delta->tv_sec;
-  m.m_lc_pm_time.nsec = delta->tv_usec * 1000; /* convert usec to nsec */
-
-  if (_syscall(PM_PROC_NR, PM_CLOCK_SETTIME, &m) < 0)
-  	return -1;
-
-  if (olddelta != NULL) {
-	/* the kernel returns immediately and the adjustment happens in the 
-	 * background. Also, any currently running adjustment is stopped by 
-	 * another call to adjtime(2), so the only values possible on Minix
-	 * for olddelta are those of delta.
+	/*
+	 * we always attempt the syscall first and switch to 
+	 * clockctl if that fails with EPERM
 	 */
-	olddelta->tv_sec = delta->tv_sec;
-	olddelta->tv_usec = delta->tv_usec;
-  }
+	if (__clockctl_fd == -1) {
+		rv = ____adjtime50(delta, olddelta);
+	
+		/*
+		 * try via clockctl if the call fails with EPERM
+		 */
+		if (rv != -1 || errno != EPERM)
+			return rv;
 
-  return 0;
+		/*
+		 * If this fails, it means that we are not root
+		 * and we cannot open clockctl. This is a failure.
+		 */
+		__clockctl_fd = open(_PATH_CLOCKCTL, O_WRONLY | O_CLOEXEC, 0);
+		if (__clockctl_fd == -1) {
+			/* original error was EPERM - don't leak open errors */
+			errno = EPERM;
+			return -1;
+		}
+	}
+
+	/* 
+	 * If __clockctl_fd >=0, clockctl has already been open
+	 * and used, so we carry on using it.
+	 */
+	args.delta = delta;
+	args.olddelta = olddelta;
+	return ioctl(__clockctl_fd, CLOCKCTL_ADJTIME, &args);
 }
-
