@@ -183,6 +183,10 @@ static int vfs_memmap(struct exec_info *execi,
  *				pm_exec					     *
  *===========================================================================*/
 int pm_exec(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
+	vir_bytes *pc, vir_bytes *newsp, vir_bytes *ps_str) {
+		return pm_exec_osp(path, path_len, frame, frame_len, pc, newsp, (vir_bytes) 0, ps_str);
+	}
+int pm_exec_osp(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
 	vir_bytes *pc, vir_bytes *newsp, vir_bytes osp, vir_bytes *UNUSED(ps_str))
 {
 /* Perform the execve(name, argv, envp) call.  The user library builds a

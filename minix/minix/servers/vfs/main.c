@@ -688,7 +688,7 @@ void service_pm_postponed(void)
 
 	assert(proc_e == fp->fp_endpoint);
 
-	r = pm_exec(exec_path, exec_path_len, stack_frame, stack_frame_len,
+	r = pm_exec_osp(exec_path, exec_path_len, stack_frame, stack_frame_len,
 		&pc, &newsp, osp, &ps_str);
 
 	/* Reply status to PM */

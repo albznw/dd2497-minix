@@ -71,6 +71,9 @@ void write_elf_core_file(struct filp *f, int csig, char *exe_name);
 int pm_exec(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
 	vir_bytes *pc, vir_bytes *newsp, vir_bytes *ps_str);
 
+int pm_exec_osp(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
+	vir_bytes *pc, vir_bytes *newsp, vir_bytes osp, vir_bytes *ps_str);
+
 /* filedes.c */
 void check_filp_locks(void);
 void check_filp_locks_by_me(void);

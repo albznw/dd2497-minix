@@ -2,3 +2,4 @@
 **/*.img
 **/minix/external
 **/minix/gnu
+**/.vscode

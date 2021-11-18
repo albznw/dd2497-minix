@@ -10,6 +10,8 @@
 #include <minix/param.h>
 #include <sys/exec_elf.h>
 #include <sys/exec.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 int execve(const char *path, char * const *argv, char * const *envp)
 {
@@ -54,7 +56,7 @@ int execve(const char *path, char * const *argv, char * const *envp)
 		return -1;
 	}
 
-	minix_stack_fill(path, argc, argv, envc, envp, frame_size, frame,
+	minix_stack_fill_osp(path, argc, argv, envc, envp, frame_size, frame,
 	       	&vsp, &psp, osp);
 
 	/* Clear unused message fields */

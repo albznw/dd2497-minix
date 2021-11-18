@@ -118,6 +118,12 @@ void minix_stack_params(const char *path, char * const *argv, char * const *envp
  *****************************************************************************/
 void minix_stack_fill(const char *path, int argc, char * const *argv,
 	int envc, char * const *envp, size_t stack_size, char *frame,
+	int *vsp, struct ps_strings **psp) {
+		minix_stack_fill_osp(path, argc, argv, envc, envp, stack_size, frame, vsp, psp, 0);
+	}
+
+void minix_stack_fill_osp(const char *path, int argc, char * const *argv,
+	int envc, char * const *envp, size_t stack_size, char *frame,
 	int *vsp, struct ps_strings **psp, int osp)
 {
 	char * const *p;
