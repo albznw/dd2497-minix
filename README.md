@@ -8,4 +8,3 @@ Tommie Andersson tommiean@kth.se
 Henrik Kultala, kultala@kth.se  
 Albin Winkelmann, albinwi@kth.se  
 Hîvron Stenhav, hivron@kth.se
-

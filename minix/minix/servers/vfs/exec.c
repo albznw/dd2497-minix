@@ -183,7 +183,7 @@ static int vfs_memmap(struct exec_info *execi,
  *				pm_exec					     *
  *===========================================================================*/
 int pm_exec(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
-	vir_bytes *pc, vir_bytes *newsp, vir_bytes *UNUSED(ps_str))
+	vir_bytes *pc, vir_bytes *newsp, vir_bytes osp, vir_bytes *UNUSED(ps_str))
 {
 /* Perform the execve(name, argv, envp) call.  The user library builds a
  * complete stack image, including pointers, args, environ, etc.  The stack
@@ -214,8 +214,8 @@ int pm_exec(vir_bytes path, size_t path_len, vir_bytes frame, size_t frame_len,
 
   /* passed from exec() libc code */
   execi.userflags = 0;
-  execi.args.stack_high = minix_get_user_sp();
-  execi.args.stack_size = DEFAULT_STACK_LIMIT;
+  execi.args.stack_high = minix_get_user_sp() - osp;
+  execi.args.stack_size = DEFAULT_STACK_LIMIT - osp;
 
   lookup_init(&resolve, fullpath, PATH_NOFLAGS, &execi.vmp, &execi.vp);
 
