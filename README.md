@@ -1,9 +1,15 @@
-# minix-project
-A security project to add some feature to Minix OS
+# DD2497 System Security Rroject with Minix
 
-## Project members
+### Participants
 
-* Erik Johansson (erikjo9@kth.se)
-* Isak Peterson (isakp@kth.se)
-* Daniel Dahlgren (ddah@kth.se)
-* Toni Karppi (tonik@kth.se)
+André Brogärd, brogard@kth.se  
+Tommie Andersson tommiean@kth.se  
+Henrik Kultala, kultala@kth.se  
+Albin Winkelmann, albinwi@kth.se  
+Hîvron Stenhav, hivron@kth.se
+
+### Project Specification
+[Link to project specification PDF](Group5_Project_Specification.pdf)
+
+### Project Report
+_To be written_
