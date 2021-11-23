@@ -1,4 +1,5 @@
-BINDIR?=/usr/sbin
-MAN?=
+#	$NetBSD: Makefile.inc,v 1.6 2009/04/22 15:23:01 lukem Exp $
+#	from: @(#)Makefile.inc	8.1 (Berkeley) 6/6/93
 
-.include "../Makefile.inc"
+BINDIR?=	/usr/sbin
+WARNS?=		4
