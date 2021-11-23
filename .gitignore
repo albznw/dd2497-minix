@@ -15,8 +15,6 @@ cscope.*
 lib*.so*
 *.a
 *.so.*
-*.d
-!etc/*.d
 .depend
 *.gcno
 *.gcda
