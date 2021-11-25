@@ -11,5 +11,10 @@ Hîvron Stenhav, hivron@kth.se
 ### Project Specification
 [Link to project specification PDF](Group5_Project_Specification.pdf)
 
+### Docs
+Used to aid us in our Firewall-developing-process.  
+[docs](docs.md)
+[trello](https://trello.com/b/WNfCIHF4/project-board)
+
 ### Project Report
 _To be written_
