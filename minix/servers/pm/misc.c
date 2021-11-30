@@ -213,6 +213,25 @@ int do_getepname(void)
 }
 
 /*===========================================================================*
+ *				do_getepeffuid		             *
+ *===========================================================================*/
+int do_getepeffuid(void)
+{
+  struct mproc *rmp;
+  endpoint_t ep;
+  int slot;
+
+  ep = m_in.m_lsys_pm_getepinfo.endpt;
+  if (pm_isokendpt(ep, &slot) != OK)
+	  return(ESRCH);	//no such process
+  rmp = &mproc[slot];
+  //reply with mp_name
+  mp->mp_reply.m_pm_lsys_getepeffuid.eff_uid = rmp->mp_effuid; // Cannot fail
+
+  return OK;
+}
+
+/*===========================================================================*
  *				do_reboot				     *
  *===========================================================================*/
 int

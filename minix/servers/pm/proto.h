@@ -49,6 +49,7 @@ int do_getsysinfo(void);
 int do_getprocnr(void);
 int do_getepinfo(void);
 int do_getepname(void);
+int do_getepeffuid(void);
 int do_svrctl(void);
 int do_getsetpriority(void);
 int do_getrusage(void);

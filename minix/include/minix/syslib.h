@@ -268,6 +268,8 @@ int getprocnr(pid_t pid, endpoint_t *proc_ep);
 int mapdriver(const char *label, devmajor_t major, const int *domains,
 	int nr_domains);
 int getepname(endpoint_t proc_ep, char * buf, int buf_len);
+int getepeffuid(endpoint_t proc_ep, uid_t *effuid);
+
 pid_t getepinfo(endpoint_t proc_ep, uid_t *uidp, gid_t *gidp);
 pid_t getnpid(endpoint_t proc_ep);
 uid_t getnuid(endpoint_t proc_ep);

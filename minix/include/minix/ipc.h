@@ -1840,6 +1840,13 @@ typedef struct {
 } mess_pm_lsys_getepname;
 _ASSERT_MSG_SIZE(mess_pm_lsys_getepname);
 
+typedef struct { //Struct for message from pm about uid(effective)
+	uid_t eff_uid;
+
+	uint8_t padding[52];
+} mess_pm_lsys_getepeffuid;
+_ASSERT_MSG_SIZE(mess_pm_lsys_getepeffuid);
+
 typedef struct {
 	endpoint_t endpt;
 
@@ -2653,6 +2660,7 @@ typedef struct noxfer_message {
 		mess_pm_lexec_exec_new	m_pm_lexec_exec_new;
 		mess_pm_lsys_getepinfo	m_pm_lsys_getepinfo;
 		mess_pm_lsys_getepname	m_pm_lsys_getepname;
+		mess_pm_lsys_getepeffuid m_pm_lsys_getepeffuid;
 		mess_pm_lsys_getprocnr	m_pm_lsys_getprocnr;
 		mess_pm_lsys_proc_event	m_pm_lsys_proc_event;
 		mess_pm_lsys_sigs_signal m_pm_lsys_sigs_signal;

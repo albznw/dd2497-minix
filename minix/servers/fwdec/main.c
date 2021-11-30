@@ -69,8 +69,11 @@ int main(int argc, char **argv)
       result = OK;
       break;
     default:
+      uid_t effuid = 10;
       if(m.m_fwdec_ip4.user_endp) {
-        getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);
+        getepname(m.m_fwdec_ip4.user_endp, proc_name, 16); // cannot fail
+        getepeffuid(m.m_fwdec_ip4.user_endp, &effuid); // TODO: NOW IF THIS FAILS, effuid still root => 0
+        printf(effuid)
       }
       src_ip = m.m_fwdec_ip4.src_ip;
       dest_ip = m.m_fwdec_ip4.dest_ip;
