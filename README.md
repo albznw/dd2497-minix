@@ -3,7 +3,7 @@
 ### Participants
 
 André Brogärd, brogard@kth.se  
-Tommie Andersson tommiean@kth.se  
+Tommie Andersson, tommiean@kth.se  
 Henrik Kultala, kultala@kth.se  
 Albin Winkelmann, albinwi@kth.se  
 Hîvron Stenhav, hivron@kth.se
@@ -13,7 +13,7 @@ Hîvron Stenhav, hivron@kth.se
 
 ### Docs
 Used to aid us in our Firewall-developing-process.  
-[docs](docs.md)
+[docs](docs.md)  
 [trello](https://trello.com/b/WNfCIHF4/project-board)
 
 ### Project Report

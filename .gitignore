@@ -4,6 +4,7 @@
 lib*.so*
 *.a
 *.so.*
+**/obj.i386
 
 # VSCode
 .vscode
