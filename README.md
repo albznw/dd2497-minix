@@ -9,7 +9,7 @@ Albin Winkelmann, albinwi@kth.se
 Hîvron Stenhav, hivron@kth.se
 
 ## Run the application
-To compile the application, it's recommended to use docker-compose. Simply navigate to the [minix](./minix/) folder in the root directory and compile the operating system using
+To compile the application, it's recommended to use docker-compose. Navigate to the root directory and compile the operating system using
 
 ```sh
 $ docker-compose up
