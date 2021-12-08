@@ -81,7 +81,7 @@ int main(int argc, char **argv)
       src_port = m.m_fwdec_ip4.src_port;
       dest_port = m.m_fwdec_ip4.dest_port;
       flags = m.m_fwdec_ip4.flags;
-      result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags);
+      result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags, effuid);
       break;
     }
 

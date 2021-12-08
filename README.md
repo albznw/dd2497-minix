@@ -1,4 +1,4 @@
-# DD2497 System Security Rroject with Minix
+# DD2497 System Security Project with Minix
 
 ### Participants
 
@@ -24,6 +24,12 @@ Then you can start the OS
 ```sh
 $ qemu-system-i386 -L . -m 256M -drive file=minix_x86.img,if=ide,format=raw -serial stdio -curses
 ```
+
+Start QEMU with internet access
+```sh
+$ qemu-system-i386 -L . -m 256M -drive file=minix_x86.img,if=ide,format=raw -netdev user,id=mynet0 -device e1000,netdev=mynet0 -serial stdio -curses
+```
+
 `-serial stdio` connects your terminal to the QEMU vm allowing you to use your own keyboard layout instead of being forced to use the english layout on QEMU.  
 `-curses` starts the QEMU instance headlessly, allowing you to start the application from a server.  
 ### Project Specification
