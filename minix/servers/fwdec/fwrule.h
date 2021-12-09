@@ -348,11 +348,14 @@ void remove_chain_rule(fw_chain *chain, int index) {
 fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
                             const uint32_t ip_addr, const uint16_t port,
                             const char *p_name, const uint8_t direction, const uid_t uid) {
-  
+  if (chain == NULL){
+    printf("WARN: Chain null - find_matching_chain_rule\n\r");
+    return NULL;
+  }
   fw_chain_entry *c_entry = chain->head_entry;
   while(c_entry != NULL) {
-    printf("Params: type(%d) ip(%d) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, port, p_name, direction, uid);
-    printf("Checking rule: user(%d) ip(%d-%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end);
+    printf("Params: type(%d) ip(%d) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, port, (p_name == NULL ? "" : p_name), direction, uid);
+    printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action;
 
     // A value of 0 on a rule variable captures all 
     if(
@@ -362,7 +365,7 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
         (c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY)
       ) &&
       (c_entry->rule->port == port || c_entry->rule->port == 0) &&
-      // (strcmp(c_entry->rule->p_name, "\0") || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name))) &&
+      (strcmp(c_entry->rule->p_name, "\0") || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name))) &&
       (c_entry->rule->user == 0 || c_entry->rule->user == uid) &&
       (c_entry->rule->direction == BOTH_WAYS || c_entry->rule->direction == direction)  
       ) {
@@ -373,7 +376,7 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
   }
 
   /*
-  ////////// pasted by tommieboi
+  
   
       (c_entry->rule->type == type || c_entry->rule->type == 0) && 
       (

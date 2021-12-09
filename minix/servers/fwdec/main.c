@@ -36,6 +36,7 @@ int main(int argc, char **argv)
  * sending the reply. The loop never terminates, unless a panic occurs.
  */
 
+  printf("fwdec: start - main\n\r");
   message m;
   int result;
 
@@ -59,10 +60,12 @@ int main(int argc, char **argv)
     switch (callnr)
     {
     case FWDEC_ADD_RULE:
+      printf("add_rule - should not run\n\r");
       result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
 				                m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
       break;
     case FWDEC_DEL_RULE:
+      printf("delete_rule- should not run\n\r");
       result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
 				                    m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
       break;
@@ -76,12 +79,14 @@ int main(int argc, char **argv)
         getepeffuid(m.m_fwdec_ip4.user_endp, &effuid); // TODO: NOW IF THIS FAILS, effuid still root => 0
         printf("uid: %d \n", effuid);
       }
+      printf("fwdec: switch-default - main\n\r");
       src_ip = m.m_fwdec_ip4.src_ip;
       dest_ip = m.m_fwdec_ip4.dest_ip;
       src_port = m.m_fwdec_ip4.src_port;
       dest_port = m.m_fwdec_ip4.dest_port;
       flags = m.m_fwdec_ip4.flags;
       result = check_packet(callnr, src_ip, dest_ip, src_port, dest_port, (char*) proc_name, flags, effuid);
+      printf("fwdec: switch-end - main\n\r");
       break;
     }
 

@@ -95,17 +95,20 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
  *===========================================================================*/
 
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid){
+  printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(chain, type, src_ip, port, p_name, direction, uid);
   // Whitelist firewall drops packets if no matching rule is found
   if (matched_rule == NULL) {
+    printf("Packet dropped - no rule - check_packet_match\n\r");
     return LWIP_DROP_PACKET;
   }
   
   if (matched_rule->action == FW_RULE_REJECT) {
+    printf("Packet dropped - by rule - check_packet_match\n\r");
     log("Packet dropped\n\r");
     return LWIP_DROP_PACKET;
   }
-
+  printf("Packet kept - check_packet_match\n\r");
   log("Packet accepted\n\r");
   return LWIP_KEEP_PACKET;
 }
@@ -201,6 +204,7 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                  const uint16_t src_port, const uint16_t dest_port,
                  const char* p_name, const uint64_t flags, uid_t uid) {
+  printf("Checking packet - check_packet\n\r");
   int result;
 
   switch (type) {
