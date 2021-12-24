@@ -71,15 +71,17 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   //           FW_RULE_ACCEPT, "dig");
   // push_rule(&out_rules, IP_ANY, IP_ANY, FW_UDP, 0, MED_PRIORITY, FW_RULE_REJECT,
   //           "dig");
-
+  uint32_t localhost = ip4_from_parts(127, 0, 0, 1);
   uint32_t internal_low = ip4_from_parts(10, 0, 2, 0);
   uint32_t internal_high = ip4_from_parts(10, 0, 2, 255);
   // Cannot fail
   print_chain_rules(chain);
   printf("Setting up rules\n\r");
-  insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_REJECT, NULL, OUT_RULE);
+  insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
+  insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
   insert_chain_rule(chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   print_chain_rules(chain);
@@ -95,7 +97,7 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
  *===========================================================================*/
 
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid){
-  printf("Checking packet - check_packet_match\n\r");
+  //printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(chain, type, src_ip, port, p_name, direction, uid);
   // Whitelist firewall drops packets if no matching rule is found
   if (matched_rule == NULL) {
@@ -108,7 +110,9 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
     log("Packet dropped\n\r");
     return LWIP_DROP_PACKET;
   }
-  printf("Packet kept - check_packet_match\n\r");
+  char prettyip[64];
+  get_ip_string(prettyip, 64, src_ip);
+  printf("Packet kept - dir(%d) prettyip(%s) type(%d)\n\r", direction, prettyip, type);
   log("Packet accepted\n\r");
   return LWIP_KEEP_PACKET;
 }
@@ -204,7 +208,7 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                  const uint16_t src_port, const uint16_t dest_port,
                  const char* p_name, const uint64_t flags, uid_t uid) {
-  printf("Checking packet - check_packet\n\r");
+  //printf("Checking packet - check_packet\n\r");
   int result;
 
   switch (type) {

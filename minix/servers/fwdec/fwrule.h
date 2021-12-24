@@ -353,9 +353,11 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
     return NULL;
   }
   fw_chain_entry *c_entry = chain->head_entry;
+  char prettyip[64];
+  get_ip_string(prettyip, 64, ip_addr);
+  printf("Params: type(%d) ip(%d) prettyip(%s) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, prettyip, port, (p_name == NULL ? "" : p_name), direction, uid);
   while(c_entry != NULL) {
-    printf("Params: type(%d) ip(%d) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, port, (p_name == NULL ? "" : p_name), direction, uid);
-    printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action;
+    printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action);
 
     // A value of 0 on a rule variable captures all 
     if(
@@ -365,7 +367,7 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
         (c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY)
       ) &&
       (c_entry->rule->port == port || c_entry->rule->port == 0) &&
-      (strcmp(c_entry->rule->p_name, "\0") || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name))) &&
+      (strcmp(c_entry->rule->p_name, "\0") == 0 || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name) == 0)) &&
       (c_entry->rule->user == 0 || c_entry->rule->user == uid) &&
       (c_entry->rule->direction == BOTH_WAYS || c_entry->rule->direction == direction)  
       ) {
