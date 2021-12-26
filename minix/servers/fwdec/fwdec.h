@@ -30,7 +30,4 @@
 #define FW_FLAG_IP_IN_RANGE 0x2
 #define FW_FLAG_EXACT_IP    0x4
 
-
-
-
 #endif // _FWDEC_H_

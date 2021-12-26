@@ -59,11 +59,14 @@ int main(int argc, char **argv)
 
     switch (callnr)
     {
+
+    //TODO5 Updaate add_rule arguments (and possibly check that you are allowed to add rule)  
     case FWDEC_ADD_RULE:
       printf("add_rule - should not run\n\r");
       result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
 				                m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
       break;
+    //TODO5 Updaate delete_rule arguments (and possibly check that you are allowed to delete rule)
     case FWDEC_DEL_RULE:
       printf("delete_rule- should not run\n\r");
       result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
@@ -75,6 +78,7 @@ int main(int argc, char **argv)
       break;
     default:
       if(m.m_fwdec_ip4.user_endp) {
+        // TODO5: Document what is their purpose
         getepname(m.m_fwdec_ip4.user_endp, proc_name, 16); // cannot fail
         getepeffuid(m.m_fwdec_ip4.user_endp, &effuid); // TODO: NOW IF THIS FAILS, effuid still root => 0
         //printf("uid: %d \n", effuid);

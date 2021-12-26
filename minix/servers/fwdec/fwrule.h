@@ -13,20 +13,6 @@
 #define OUT_RULE 1
 #define BOTH_WAYS 2
 
-/**
- * Let fw_rules be a doubly linked list that exists on the HEAP.
- */
-typedef struct fw_rule {
-  uint8_t type;
-  uint8_t priority;
-  uint8_t action;
-  uint32_t ip_start;
-  uint32_t ip_end;
-  uint16_t port;
-  char p_name[MAX_NAME_LEN];
-  struct fw_rule *next;
-  struct fw_rule *prev;
-} fw_rule;
 
 // Struct for firewall chains
 typedef struct fw_chain_rule {
@@ -50,21 +36,7 @@ typedef struct fw_chain {
   struct fw_chain_entry *head_entry;
 } fw_chain;
 
-fw_rule *find_matching_rule(fw_rule **head_ref, const uint8_t type,
-                            const uint32_t ip_addr, const uint16_t port,
-                            const char *p_name);
-
 void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr);
-
-void push_rule(fw_rule **head_ref, const uint32_t ip_start,
-               const uint32_t ip_end, const uint8_t type, const uint16_t port,
-               const uint8_t priority, const uint8_t action,
-               const char *p_name);
-
-void remove_rule(fw_rule **head_ref, const uint32_t ip_start,
-                 const uint32_t ip_end, const uint8_t type, const uint16_t port,
-                 const uint8_t priority, const uint8_t action,
-                 const char *p_name);
 
 void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index);
 
@@ -81,6 +53,5 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
                             const char *p_name, const uint8_t direction, const uid_t uid);
 
 void print_chain_rules(fw_chain *chain);
-
 
 #endif
