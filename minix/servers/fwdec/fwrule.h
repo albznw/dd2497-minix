@@ -11,10 +11,14 @@
 
 #define IN_RULE 1
 #define OUT_RULE 2
-#define BOTH_WAYS 3
+
+// TODO5: Fix functionality for both ways
+//#define BOTH_WAYS 3
 
 
-// Struct for firewall chains
+/**
+  Struct for individual rules
+*/
 typedef struct fw_chain_rule {
   uint8_t type;
   uint8_t action;
@@ -26,12 +30,18 @@ typedef struct fw_chain_rule {
   char p_name[MAX_NAME_LEN];
 } fw_chain_rule;
 
+/**
+  Struct for entries (rules) in a chain
+*/
 typedef struct fw_chain_entry {
   struct fw_chain_rule *rule;
   struct fw_chain_entry *prev;
   struct fw_chain_entry *next;
 } fw_chain_entry;
 
+/**
+  Struct for chains that hold rules 
+*/
 typedef struct fw_chain {
   struct fw_chain_entry *head_entry;
 } fw_chain;

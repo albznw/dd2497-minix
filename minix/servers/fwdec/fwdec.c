@@ -57,9 +57,10 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   uint32_t localhost = ip4_from_parts(127, 0, 0, 1);
   uint32_t internal_low = ip4_from_parts(10, 0, 2, 0);
   uint32_t internal_high = ip4_from_parts(10, 0, 2, 255);
-  // Cannot fail
+  
   print_chain_rules(chain);
-  printf("Setting up rules\n\r");
+  
+  printf("Setting up rules\n\r"); 
   insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
@@ -73,9 +74,69 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   return (OK);
 }
 
-/*===========================================================================*
- *				do_publish *
- *===========================================================================*/
+// TODO5: FIX SO IT USES PUSH_CHAIN_RULE CORRECTLY
+
+/**
+  Wrapper function to add new rules via the command line interface (CLI).
+*/
+int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
+             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+  printf("fwdec: adding rule\n\r");
+  switch (direction) {
+    case 0: //Add rule to incoming packets
+      /*
+      push_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
+                *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+    default: //Add rule to outgoing packets
+      /*
+      push_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
+                *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+  }
+  return 0;
+}
+
+/**
+  Listing all existing rules
+*/
+void list_rules(void) {
+  print_chain_rules(chain);
+  return;
+}
+
+// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
+
+/**
+  Wrapper function to delete existing rules via the command line interface (CLI).
+*/
+int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
+                uint8_t action, uint32_t ip_start, uint32_t ip_end,
+                uint16_t port, char* p_name) {
+  printf("fwdec: removing rule\n\r");
+  switch (direction) {
+    case 0: //Delete rules for incoming packet
+      /*
+      remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
+                  *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+    default: //Delete rules for outgoing packet
+      /*
+      remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
+                  *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+  }
+  return 0;
+}
+
+/** 
+  For every packet, check for matching rules that will either tell if the packet is allowed or dropped. If no rules
+  are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
+*/
 
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid){
   //printf("Checking packet - check_packet_match\n\r");
@@ -87,11 +148,14 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
     return LWIP_DROP_PACKET;
   }
   
+  //If a matching rule is found, and the actionis reject drop the packet
   if (matched_rule->action == FW_RULE_REJECT) {
     printf("Packet dropped - by rule - check_packet_match\n\r");
     log("Packet dropped\n\r");
     return LWIP_DROP_PACKET;
   }
+
+  //If we reach this point, allow packet
   char prettyip[64];
   get_ip_string(prettyip, 64, src_ip);
   printf("Packet kept - dir(%d) prettyip(%s) type(%d)\n\r", direction, prettyip, type);
@@ -109,54 +173,9 @@ int check_tcp_match(const uint32_t src_ip, const uint16_t port,
   return check_packet_match(FW_TCP, src_ip, port, p_name, direction, uid);
 }
 
-// TODO5: FIX SO IT USES PUSH_CHAIN_RULE CORRECTLY
-int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
-             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
-  printf("fwdec: adding rule\n\r");
-  switch (direction) {
-    case 0:
-      /*
-      push_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
-                *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-    default:
-      /*
-      push_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
-                *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-  }
-  return 0;
-}
-
-void list_rules(void) {
-  print_chain_rules(chain);
-  return;
-}
-
-// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
-int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
-                uint8_t action, uint32_t ip_start, uint32_t ip_end,
-                uint16_t port, char* p_name) {
-  printf("fwdec: removing rule\n\r");
-  switch (direction) {
-    case 0:
-      /*
-      remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
-                  *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-    default:
-      /*
-      remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
-                  *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-  }
-  return 0;
-}
-
+/**
+  Wrapper for check_packet_match function above
+*/
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                  const uint16_t src_port, const uint16_t dest_port,
                  const char* p_name, const uint64_t flags, uid_t uid) {

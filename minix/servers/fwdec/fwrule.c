@@ -6,6 +6,11 @@
 #include "fwdec.h"
 #include "fwrule.h"
 
+/**
+ * Get a string representation of an uint32_t IP address.
+ * 
+ * @param buf Buffer to place the IP string in
+ */
 void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
   unsigned char bytes[4] = {ip_addr & 0xFF, (ip_addr >> 8) & 0xFF,
                             (ip_addr >> 16) & 0xFF, (ip_addr >> 24) & 0xFF};
@@ -13,9 +18,9 @@ void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
 }
 
 /**
- * Adds a new rule in the chain, if the wanted index is not found the
- * rule will be placed in the end of the chain. A fast way to add rules
- * to the end of the list is to add them at index -1.
+ * Adds a new rule in the chain by creating a new entry in the chain containing the specified rule. 
+ * If the wanted index is not found the rule will be placed in the end of the chain. 
+ * A fast way to add rules to the end of the list is to add them at index -1.
  *
  * @param new_rule pointer to the new rule on the heap
  * @param index wanted index
@@ -27,14 +32,13 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
   fw_chain_entry *c_entry = chain->head_entry;
   fw_chain_entry *new_entry = (fw_chain_entry *)malloc(sizeof(fw_chain_entry));
 
-  // Create a new entry from the added rule
+  // Create a new entry from the rule to add
   new_entry->rule = new_rule;
   new_entry->prev = NULL;
   new_entry->next = NULL;
 
-  // No entries currently exists
+  // If we have no rules in the chain yet the new rule will be the head.
   if (chain->head_entry == NULL) {
-    // If we have no rules in the chain yet
     new_entry->prev = NULL;
     new_entry->next = NULL;
     chain->head_entry = new_entry;
@@ -44,16 +48,19 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
   int c_index = 0;
   fw_chain_entry *last_entry = NULL;
 
+  // Iterate over entries until index is found or we run out of entries
   while (c_entry) {
-    if (index == c_index) { // Add new entry before c_entry
-      // entry before the new entry;
+
+    // Add new entry before c_entry with desired index
+    if (index == c_index) {
+      // The entry that will be before the new entry;
       fw_chain_entry *tmp_prev = c_entry->prev;
-      // New references of c_entry
+      // Update entry at index (that will be after new entry) to point back to new entry
       c_entry->prev = new_entry;
-      // New references of new entry
+      // Update entry pointers of new entry
       new_entry->next = c_entry;
       new_entry->prev = tmp_prev;
-      // New reference of previous
+      // Update entry that will be before the new entry (if new entry isn't first) to point forward to new entry
       if (tmp_prev != NULL) {
         tmp_prev->next = new_entry;
       }
@@ -70,7 +77,11 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
 }
 
 /**
+ * Inserts a new rule in the chain at the specified index.
+ * If the wanted index is not found the rule will be placed in the end of the chain. 
+ * A fast way to add rules to the end of the list is to add them at index -1.
  * 
+ * @param index wanted index
  */
 void insert_chain_rule(fw_chain *chain, int index, const uint32_t ip_start,
                        const uint32_t ip_end, const uint8_t type,
@@ -104,6 +115,7 @@ void insert_chain_rule(fw_chain *chain, int index, const uint32_t ip_start,
 void remove_chain_rule(fw_chain *chain, int index) {
   fw_chain_entry *curr_entry = chain->head_entry;
   int curr_ind = 0;
+  // Iterate over entries until index is found or we run out of entries
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL ) {
@@ -117,12 +129,14 @@ void remove_chain_rule(fw_chain *chain, int index) {
   }
 
   if (curr_entry != NULL) {
+    // Update the entry coming before the one we delete
     if (curr_entry->prev != NULL) {
       curr_entry->prev->next = curr_entry->next;
     } else {
       // Rule was the first of the list. Need to update head.
       chain->head_entry = curr_entry->next;
     }
+    // Update the entry coming after the one we delete
     if (curr_entry->next != NULL) {
       curr_entry->next->prev = curr_entry->prev;
     }
@@ -133,9 +147,11 @@ void remove_chain_rule(fw_chain *chain, int index) {
   }
 }
 
-/**
- * Find first matching rule with highest priority.
- */
+
+/**  
+  TODO5: Document what this function does, and how it works once it has been fixed to work 
+  for multiple chains.
+*/
 fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
                             const uint32_t ip_addr, const uint16_t port,
                             const char *p_name, const uint8_t direction, const uid_t uid) {
@@ -150,7 +166,10 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
   while(c_entry != NULL) {
     printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action);
 
-    // A value of 0 on a rule variable captures all 
+    // A value of 0 on a rule variable captures all
+    
+    //  Check for every rule that the arguments match, if a match is found return rule 
+    //  otherwise return null ( = no rule matching) 
     if(
       (c_entry->rule->type == type || c_entry->rule->type == 0) && 
       (
