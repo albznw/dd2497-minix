@@ -9,9 +9,9 @@
 
 #define NO_UID (uid_t)0x10
 
-#define IN_RULE 0
-#define OUT_RULE 1
-#define BOTH_WAYS 2
+#define IN_RULE 1
+#define OUT_RULE 2
+#define BOTH_WAYS 3
 
 
 // Struct for firewall chains

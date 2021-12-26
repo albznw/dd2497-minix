@@ -3,11 +3,11 @@
 
 #include <stdbool.h>
 
-#define FW_IP   0
-#define FW_TCP  1
-#define FW_UDP  2
-#define FW_ICMP 3
-#define FW_RAW  4
+#define FW_IP   1
+#define FW_TCP  2
+#define FW_UDP  3
+#define FW_ICMP 4
+#define FW_RAW  5
 
 /* Function prototypes. */
 
