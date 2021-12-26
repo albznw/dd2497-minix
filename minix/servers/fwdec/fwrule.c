@@ -147,15 +147,14 @@ void remove_chain_rule(fw_chain *chain, int index) {
   }
 }
 
-
 /**  
   TODO5: Document what this function does, and how it works once it has been fixed to work 
   for multiple chains.
 */
-fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
-                            const uint32_t ip_addr, const uint16_t port,
-                            const char *p_name, const uint8_t direction, const uid_t uid) {
-  if (chain == NULL){
+fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
+                                        const uint32_t ip_addr, const uint16_t port,
+                                        const char *p_name, const uint8_t direction, const uid_t uid) {
+  if (chain == NULL) {
     printf("WARN: Chain null - find_matching_chain_rule\n\r");
     return NULL;
   }
@@ -163,26 +162,21 @@ fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
   char prettyip[64];
   get_ip_string(prettyip, 64, ip_addr);
   printf("Params: type(%d) ip(%d) prettyip(%s) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, prettyip, port, (p_name == NULL ? "" : p_name), direction, uid);
-  while(c_entry != NULL) {
+  while (c_entry != NULL) {
     printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action);
 
-    // A value of 0 on a rule variable captures all
-    
-    //  Check for every rule that the arguments match, if a match is found return rule 
-    //  otherwise return null ( = no rule matching) 
-    if(
-      (c_entry->rule->type == type || c_entry->rule->type == 0) && 
-      (
-        (c_entry->rule->ip_start <= ip_addr && c_entry->rule->ip_end >= ip_addr) || 
-        (c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY)
-      ) &&
-      (c_entry->rule->port == port || c_entry->rule->port == 0) &&
-      (strcmp(c_entry->rule->p_name, "\0") == 0 || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name) == 0)) &&
-      (c_entry->rule->user == 0 || c_entry->rule->user == uid) &&
-      (c_entry->rule->direction == BOTH_WAYS || c_entry->rule->direction == direction)  
-      ) {
-        printf("Found matching rule\n\r");
-        return c_entry->rule; 
+    //  Check for every rule that the arguments match, if a match is found return rule
+    //  otherwise return null ( = no rule matching)
+    if (
+        (c_entry->rule->type == TYPE_ANY || c_entry->rule->type == type) &&
+        ((c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY) ||
+         (c_entry->rule->ip_start <= ip_addr && c_entry->rule->ip_end >= ip_addr)) &&
+        (c_entry->rule->port == PORT_ANY || c_entry->rule->port == port) &&
+        (strcmp(c_entry->rule->p_name, PNAME_ANY) == 0 || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name) == 0)) &&
+        (c_entry->rule->user == UID_ANY || c_entry->rule->user == uid) &&
+        (c_entry->rule->direction == DIR_ANY || c_entry->rule->direction == direction)) {
+      printf("Found matching rule\n\r");
+      return c_entry->rule;
     }
     c_entry = c_entry->next;
   }
