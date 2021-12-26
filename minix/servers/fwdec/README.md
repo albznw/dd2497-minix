@@ -9,9 +9,11 @@ The chains have the following structure
 ```c
 typedef struct fw_chain {
   struct fw_chain_entry *head_entry;
+  uid_t chain_id;
 } fw_chain;
 ```
-Where `head_entry` is the first entry in every chain. If the chain is empty it's NULL.
+- The `head_entry` field refers to the first entry in every chain. If the chain is empty it's NULL.
+- The `chain_id` field specifies what type of chain it is. Possible values are found in `proto.h`.
 
 Every entry in a chain has this structure:
 
@@ -23,7 +25,8 @@ typedef struct fw_chain_entry {
 } fw_chain_entry;
 ```
 
-Where `rule` is a rule as defined below, and `next` and `prev` are pointers to the next/previous entries in the chain.
+- The  `rule` field refers to a rule as defined below
+- The `next` and`prev` fields are pointers to the next/previous entries in the chain.
 
 ```c
 typedef struct fw_chain_rule {
@@ -54,4 +57,4 @@ We have three different kind of rule lists (chains). The first chain contains ru
 
 1. (If applicable) - Check for a matching rule in the privileged chain. If a matching rule is found, follow the action by the matching rule. If drop, drop the packet, and if allow continue to the non-privileged chain. If not match is found, continue to the global chain. 
 2. Check for a matching rule in the global chain. If a matching rule is found, follow the action by the matching rule. If drop, drop the packet and if allow continue to user specific chain. If not matching rule is found, drop the packet.
-3. Check for matching rules for specific users. If no matching rule is found, allow the packet. Otherwise, follow action specified by matching rule. 
+3. Check for matching rules for specific users in the user chain. If no matching rule is found, allow the packet. Otherwise, follow action specified by matching rule. 

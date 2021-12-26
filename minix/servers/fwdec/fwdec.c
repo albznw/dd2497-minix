@@ -29,7 +29,9 @@ static void debug_log_packet(const int type, const int result,
 
 static void log(char* log_message);
 
-static fw_chain* chain = NULL;
+static fw_chain* priv_chain = NULL;
+static fw_chain* global_chain = NULL;
+static fw_chain* user_chain = NULL;
 
 static inline uint32_t ip4_from_parts(uint8_t p1, uint8_t p2, uint8_t p3,
                                       uint8_t p4) {
@@ -44,8 +46,20 @@ const char* LOGFILE = "/var/log/fwdec";  // Where the log file should be placed
  *		            sef_cb_init_fresh *
  *===========================================================================*/
 int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
-  chain = (fw_chain*)malloc(sizeof(fw_chain));
-  chain->head_entry = NULL;
+  // Initialize privileged chain
+  priv_chain = (fw_chain*)malloc(sizeof(fw_chain));
+  priv_chain->head_entry = NULL;
+  priv_chain->chain_id = PRIVILEGED_CHAIN_ID;
+
+  // Initialize global chain
+  global_chain = (fw_chain*)malloc(sizeof(fw_chain));
+  global_chain->head_entry = NULL;
+  global_chain->chain_id = GLOBAL_CHAIN_ID;
+
+  // Initialize user chain
+  user_chain = (fw_chain*)malloc(sizeof(fw_chain));
+  user_chain->head_entry = NULL;
+  user_chain->chain_id = USER_CHAIN_ID;
 
   // Push custom hard-coded rules
   uint32_t kth_ip = ip4_from_parts(130, 237, 28, 40);
@@ -56,17 +70,17 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   uint32_t internal_low = ip4_from_parts(10, 0, 2, 0);
   uint32_t internal_high = ip4_from_parts(10, 0, 2, 255);
 
-  print_chain_rules(chain);
+  print_chain_rules(priv_chain);
 
   printf("Setting up rules\n\r");
-  insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
-  insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
-  insert_chain_rule(chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  print_chain_rules(chain);
+  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
+  insert_chain_rule(priv_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  print_chain_rules(priv_chain);
 
   printf("Firewall decision server started\n\r");
   return (OK);
@@ -100,8 +114,9 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
 /**
   Listing all existing rules
 */
+// TODO5: Fix functioanlity to list specific chain(s)
 void list_rules(void) {
-  print_chain_rules(chain);
+  print_chain_rules(priv_chain);
   return;
 }
 
@@ -138,7 +153,7 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
 
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid) {
   //printf("Checking packet - check_packet_match\n\r");
-  fw_chain_rule* matched_rule = find_matching_chain_rule(chain, type, src_ip, port, p_name, direction, uid);
+  fw_chain_rule* matched_rule = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);
 
   // Whitelist firewall drops packets if no matching rule is found
   if (matched_rule == NULL) {

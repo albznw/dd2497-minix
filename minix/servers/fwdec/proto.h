@@ -9,13 +9,18 @@
 #define FW_ICMP 4
 #define FW_RAW 5
 
-// Default values that matches any value if set.
+/* Default values that matches any value if set. */
 #define TYPE_ANY 0
 #define IP_ANY 0
 #define PORT_ANY 0
 #define PNAME_ANY "\0"
 #define DIR_ANY 0
 #define UID_ANY 0
+
+/* ID:s for the rule chains */
+#define PRIVILEGED_CHAIN_ID 1
+#define GLOBAL_CHAIN_ID 2
+#define USER_CHAIN_ID 3
 
 /* Function prototypes. */
 

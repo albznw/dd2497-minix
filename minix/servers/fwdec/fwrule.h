@@ -41,10 +41,11 @@ typedef struct fw_chain_entry {
 } fw_chain_entry;
 
 /**
-  Struct for chains that hold rules 
+  Struct for chains that hold rules. Chain_id specify what type of chain it is 
 */
 typedef struct fw_chain {
   struct fw_chain_entry *head_entry;
+  uid_t chain_id;
 } fw_chain;
 
 void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr);
