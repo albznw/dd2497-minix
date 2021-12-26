@@ -39,7 +39,7 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
              uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
 int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
                 uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
-void list_rules(void);
+void list_rules(int chain_id);
 
 int sef_cb_init_fresh(int type, sef_init_info_t* info);
 

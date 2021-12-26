@@ -235,11 +235,12 @@ typedef struct {
 } mess_fwdec_ip4;
 _ASSERT_MSG_SIZE(mess_fwdec_ip4);
 
+// TODO5: FIX message; commented out below doesn't work
 typedef struct {
 	uint32_t method;
 	uint8_t direction;
 	uint8_t type;
-	uint8_t priority;
+	uint8_t chain_id;
 	uint8_t action;
 	uint32_t ip_start;
 	uint32_t ip_end;
@@ -248,6 +249,22 @@ typedef struct {
 	uint8_t padding[22];
 } mess_fwdec_rule;
 _ASSERT_MSG_SIZE(mess_fwdec_rule);
+
+/*typedef struct {
+	uint32_t method; // 4
+	uint8_t direction; // 1
+	uint8_t type; // 1
+	//uid_t uid; // 4?
+	uint8_t action; // 1
+	uint32_t ip_start; // 4
+	uint32_t ip_end; //4
+	uint16_t port; // 2
+	//uint32_t chain_id; // 4
+	//uint32_t index; // 4
+	char p_name[16]; //16
+	uint8_t padding[23]; //11
+} mess_fwdec_rule;
+_ASSERT_MSG_SIZE(mess_fwdec_rule);*/
 
 typedef struct {
 	uint8_t padding[56];

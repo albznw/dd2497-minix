@@ -803,10 +803,11 @@ int do_fwctl(void) {
 	message m;
 	memset(&m, 0, sizeof(m));
 
+	// TODO5: Update to correct fields
 	m.m_type = job_m_in.m_fwdec_rule.method;
 	m.m_fwdec_rule.direction = job_m_in.m_fwdec_rule.direction;
 	m.m_fwdec_rule.type = job_m_in.m_fwdec_rule.type;
-	m.m_fwdec_rule.priority = job_m_in.m_fwdec_rule.priority;
+	m.m_fwdec_rule.chain_id = job_m_in.m_fwdec_rule.chain_id;
 	m.m_fwdec_rule.action = job_m_in.m_fwdec_rule.action;
 	m.m_fwdec_rule.ip_start = job_m_in.m_fwdec_rule.ip_start;
 	m.m_fwdec_rule.ip_end = job_m_in.m_fwdec_rule.ip_end;

@@ -16,19 +16,21 @@ usage(void) {
 	fprintf(stderr,
 	    "usage:\t%s\n\t   %s\n\n%s\n",
 	    "firewall -ADL [-i 0-255] [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW]",
-	    "INC|OUT REJECT|ACCEPT start_ip [end_ip]",
+	    "chain_id index INC|OUT REJECT|ACCEPT start_ip [end_ip]",
         "For more information consult the manual using \"man firewall\"");
 	exit(1);
 }
 
-int
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
 	extern char *optarg;
 	extern int optind;
 
     uint32_t start_addr = 0, end_addr = 0;
     uint8_t method = 0, direction = 0, action = 0, importance = 255, type = 0;
     uint16_t port = 0;
+    int index = 0;
+    int chain_id = 0;
+    uid_t uid = 0; // TODO5: Is this the correct default value?
     char name[16]; name[0] = '\0';
     char type_str[5];
     char direction_str[4];
@@ -124,52 +126,64 @@ main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
+    if(argc == 0) {
+        fprintf(stderr, "Error: No arguments given.\n\n");
+        usage();
+    }
+    // Parse chain id
+    // TODO5 Sanitize?
+    chain_id = atoi(argv[0]);
+    
     if(method == 3) {
-        if(argc != 0){
-            fprintf(stderr, "Error: The -L (List) option takes no arguments.\n\n");
+        if(argc != 1){
+            fprintf(stderr, "Error: The -L (List) option takes a single argument specifying the chain ID.\n\n");
             usage();        
         }
-    } else if(argc == 3 || argc == 4){
+    } else if(argc == 5 || argc == 6){
+        // Parse index
+        // TODO5 Sanitize?
+        index = atoi(argv[1]);
+
         // Parse direction
-        strncpy(direction_str, argv[0], 4);
+        strncpy(direction_str, argv[2], 4);
         if(strncmp(direction_str, "INC", 4) == 0) {
             direction = INC_CHAIN;
         } else if (strncmp(direction_str, "OUT", 4) == 0){
             direction = OUT_CHAIN;
         } else {
             fprintf(stderr, "Error: did not recognize direction \"%s\". Should be either INC or OUT.\n\n",
-                            argv[0]);
+                            argv[2]);
             usage();
         }
 
         // Parse action
-        strncpy(action_str, argv[1], 7);
+        strncpy(action_str, argv[3], 7);
         if(strncmp(action_str, "REJECT", 7) == 0) {
             action = DROP_PACKET;
         } else if (strncmp(action_str, "ACCEPT", 7) == 0){
             action = ACCEPT_PACKET;
         } else {
             fprintf(stderr, "Error: did not recognize action \"%s\". Should be either REJECT or ACCEPT.\n\n",
-                            argv[1]);
+                            argv[3]);
             usage();
         }
 
         // Parse start address
-        if(!inet_pton(AF_INET, argv[2], &start_addr)) {
+        if(!inet_pton(AF_INET, argv[4], &start_addr)) {
             fprintf(stderr, "Error: Could not parse start ip \"%s\". Must be a valid ip address.\n\n", argv[2]);
             usage();
         }
         start_addr = htonl(start_addr);
 
-        if(argc == 4){
+        if(argc == 6){
             // Parse optional end address
-            if(!inet_pton(AF_INET, argv[3], &end_addr)) {
+            if(!inet_pton(AF_INET, argv[5], &end_addr)) {
                 fprintf(stderr, "Error: Could not parse end ip \"%s\". Must be a valid ip address.\n\n", argv[3]);
                 usage();
             }
             end_addr = htonl(end_addr);
         }
-    } else if (argc < 3){
+    } else if (argc < 5){
         fprintf(stderr, "Error: Too few arguments\n\n");
         usage();
     } else {
@@ -189,7 +203,7 @@ main(int argc, char **argv) {
         fwdec_delete_rule(direction, type, importance, action, start_addr, end_addr, port, (char*) name);
         break;
     case 3:
-        fwdec_list_rules();
+        fwdec_list_rules(chain_id);
     default:
         break;
     }

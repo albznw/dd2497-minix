@@ -1186,8 +1186,9 @@
 #define FWDEC_SET_TCP_FIN(flags) (flags |= (1 << 2))
 #define FWDEC_GET_TCP_FIN(flags) (flags & (1 << 2))
 
-#define FWDEC_ADD_RULE (FWDEC_BASE + 2)
-#define FWDEC_REMOVE_RULE (FWDEC_BASE + 3)
+// TODO5: Should these be used???
+//#define FWDEC_ADD_RULE (FWDEC_BASE + 2)
+//#define FWDEC_REMOVE_RULE (FWDEC_BASE + 3)
 
 /*===========================================================================*
 *		Messages for the LWIP server		     *

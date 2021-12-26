@@ -190,6 +190,7 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
  * Print the specified chain of rules.
  */
 void print_chain_rules(fw_chain *chain) {
+  printf("Printing rules for chain %d\n\r", chain->chain_id);
   printf("%-5s%-8s%-10s%-8s%-16s%-16s%-6s%-16s\n\r", "type", "action", "direction", "user ID",
          "start", "end", "port", "name");
   fw_chain_entry *curr_entry = chain->head_entry;

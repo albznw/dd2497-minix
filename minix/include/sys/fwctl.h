@@ -15,6 +15,6 @@ int fwdec_add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t ac
 int fwdec_delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
 						uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
 
-int fwdec_list_rules(void);
+int fwdec_list_rules(int chain_id);
 
 #endif /* _SYS__SVRCTL_H */

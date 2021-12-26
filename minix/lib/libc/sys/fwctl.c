@@ -11,7 +11,7 @@ int fwdec_add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t ac
 	m.m_fwdec_rule.method = FWDEC_ADD_RULE;
 	m.m_fwdec_rule.direction = direction;
 	m.m_fwdec_rule.type = type;
-	m.m_fwdec_rule.priority = priority;
+	//m.m_fwdec_rule.priority = priority;
 	m.m_fwdec_rule.action = action;
 	m.m_fwdec_rule.ip_start = ip_start;
 	m.m_fwdec_rule.ip_end = ip_end;
@@ -29,7 +29,7 @@ int fwdec_delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t
 	m.m_fwdec_rule.method = FWDEC_DEL_RULE;
 	m.m_fwdec_rule.direction = direction;
 	m.m_fwdec_rule.type = type;
-	m.m_fwdec_rule.priority = priority;
+	//m.m_fwdec_rule.priority = priority;
 	m.m_fwdec_rule.action = action;
 	m.m_fwdec_rule.ip_start = ip_start;
 	m.m_fwdec_rule.ip_end = ip_end;
@@ -39,9 +39,10 @@ int fwdec_delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t
 	return _syscall(VFS_PROC_NR, VFS_FWCTL, &m);
 }
 
-int fwdec_list_rules(void) {
+int fwdec_list_rules(int chain_id) {
 	message m;
 	memset(&m, 0, sizeof(m));
 	m.m_fwdec_rule.method = FWDEC_LIST_RULES;
+	m.m_fwdec_rule.chain_id = chain_id;
 	return _syscall(VFS_PROC_NR, VFS_FWCTL, &m);
 }

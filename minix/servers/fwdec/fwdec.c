@@ -82,6 +82,16 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   insert_chain_rule(priv_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   print_chain_rules(priv_chain);
 
+  //Only for testing purposes, delete later
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_REJECT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
+  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  print_chain_rules(global_chain);  
+
   printf("Firewall decision server started\n\r");
   return (OK);
 }
@@ -114,9 +124,22 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
 /**
   Listing all existing rules
 */
-// TODO5: Fix functioanlity to list specific chain(s)
-void list_rules(void) {
-  print_chain_rules(priv_chain);
+void list_rules(int chain_id) {
+  switch (chain_id) {
+    case PRIVILEGED_CHAIN_ID:
+      print_chain_rules(priv_chain);
+      break;
+    case GLOBAL_CHAIN_ID:
+      print_chain_rules(global_chain);
+      break;
+    case USER_CHAIN_ID:
+      print_chain_rules(user_chain);
+      break;
+    default:
+      // TODO5: update to print on stderr
+      printf("Error: Invalid chain ID: %d", chain_id);
+      break;
+  }
   return;
 }
 
