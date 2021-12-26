@@ -1,10 +1,12 @@
+#include "fwrule.h"
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "inc.h"
+
 #include "fwdec.h"
-#include "fwrule.h"
+#include "inc.h"
 
 /**
  * Get a string representation of an uint32_t IP address.
@@ -50,7 +52,6 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
 
   // Iterate over entries until index is found or we run out of entries
   while (c_entry) {
-
     // Add new entry before c_entry with desired index
     if (index == c_index) {
       // The entry that will be before the new entry;
@@ -118,8 +119,8 @@ void remove_chain_rule(fw_chain *chain, int index) {
   // Iterate over entries until index is found or we run out of entries
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
-    if (curr_rule == NULL ) {
-      printf ("ERROR! When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
+    if (curr_rule == NULL) {
+      printf("ERROR! When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
       return;
     }
     if (curr_ind == index) {
@@ -194,8 +195,8 @@ void print_chain_rules(fw_chain *chain) {
   fw_chain_entry *curr_entry = chain->head_entry;
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
-    if (curr_rule == NULL ) {
-      printf ("ERROR! Chain-entry without an associated rule was found!\n\r");
+    if (curr_rule == NULL) {
+      printf("ERROR! Chain-entry without an associated rule was found!\n\r");
       return;
     }
 
@@ -222,7 +223,7 @@ void print_chain_rules(fw_chain *chain) {
     } else {
       strncpy(type_str, "IP", 5);
     }
-    
+
     if (curr_rule->direction == IN_RULE) {
       strncpy(direction_str, "INGRESS", 10);
     } else {
@@ -231,7 +232,7 @@ void print_chain_rules(fw_chain *chain) {
     printf("%-5s%-8s%-10s%-8d%-16s%-16s%-6d%-16s\n\r", type_str, action,
            direction_str, curr_rule->user, start_ip_str, end_ip_str, curr_rule->port,
            curr_rule->p_name);
-    
+
     curr_entry = curr_entry->next;
   }
   printf("\n\r");

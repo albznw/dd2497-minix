@@ -1,6 +1,8 @@
 #ifndef _FWDEC_RULE_H_
 #define _FWDEC_RULE_H_
 
+#include "inc.h"
+
 #define MAX_PRIORITY 0xFF
 #define MED_PRIORITY 0xAA
 #define MIN_PRIORITY 0x00
@@ -14,7 +16,6 @@
 
 // TODO5: Fix functionality for both ways
 //#define BOTH_WAYS 3
-
 
 /**
   Struct for individual rules
@@ -58,9 +59,9 @@ void insert_chain_rule(fw_chain *chain, int index, const uint32_t ip_start,
 
 void remove_chain_rule(fw_chain *chain, int index);
 
-fw_chain_rule* find_matching_chain_rule(fw_chain *chain, const uint8_t type,
-                            const uint32_t ip_addr, const uint16_t port,
-                            const char *p_name, const uint8_t direction, const uid_t uid);
+fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
+                                        const uint32_t ip_addr, const uint16_t port,
+                                        const char *p_name, const uint8_t direction, const uid_t uid);
 
 void print_chain_rules(fw_chain *chain);
 

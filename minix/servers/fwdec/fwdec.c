@@ -3,23 +3,21 @@
  * Author: Thomas Peterson
  */
 
-#include "inc.h"
 #include "fwdec.h"
 
-#include "fwrule.h"
-
+#include <fcntl.h>  //File handling flags
 #include <minix/com.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <minix/fwtcp.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <unistd.h> //File handling
-#include <fcntl.h> //File handling flags
-#include <sys/time.h> //System time
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>  //System time
+#include <unistd.h>    //File handling
 
-#include <minix/fwtcp.h>
+#include "fwrule.h"
+#include "inc.h"
 
 /* Declare local functions. */
 #ifdef FWDEC_DEBUG
@@ -57,10 +55,10 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   uint32_t localhost = ip4_from_parts(127, 0, 0, 1);
   uint32_t internal_low = ip4_from_parts(10, 0, 2, 0);
   uint32_t internal_high = ip4_from_parts(10, 0, 2, 255);
-  
+
   print_chain_rules(chain);
-  
-  printf("Setting up rules\n\r"); 
+
+  printf("Setting up rules\n\r");
   insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
@@ -83,13 +81,13 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
              uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
   printf("fwdec: adding rule\n\r");
   switch (direction) {
-    case 0: //Add rule to incoming packets
+    case 0:  //Add rule to incoming packets
       /*
       push_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
                 *p_name != '\0' ? p_name : NULL);
       */
       break;
-    default: //Add rule to outgoing packets
+    default:  //Add rule to outgoing packets
       /*
       push_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
                 *p_name != '\0' ? p_name : NULL);
@@ -117,13 +115,13 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
                 uint16_t port, char* p_name) {
   printf("fwdec: removing rule\n\r");
   switch (direction) {
-    case 0: //Delete rules for incoming packet
+    case 0:  //Delete rules for incoming packet
       /*
       remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
                   *p_name != '\0' ? p_name : NULL);
       */
       break;
-    default: //Delete rules for outgoing packet
+    default:  //Delete rules for outgoing packet
       /*
       remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
                   *p_name != '\0' ? p_name : NULL);
@@ -138,16 +136,16 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
 
-int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid){
+int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid) {
   //printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(chain, type, src_ip, port, p_name, direction, uid);
-  
+
   // Whitelist firewall drops packets if no matching rule is found
   if (matched_rule == NULL) {
     printf("Packet dropped - no rule - check_packet_match\n\r");
     return LWIP_DROP_PACKET;
   }
-  
+
   //If a matching rule is found, and the actionis reject drop the packet
   if (matched_rule->action == FW_RULE_REJECT) {
     printf("Packet dropped - by rule - check_packet_match\n\r");
@@ -164,7 +162,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
 }
 
 int check_tcp_match(const uint32_t src_ip, const uint16_t port,
-                       const char* p_name, uint64_t flags, uint8_t direction, uid_t uid) {
+                    const char* p_name, uint64_t flags, uint8_t direction, uid_t uid) {
   // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
   if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
     log("Packet dropped\n\r");
