@@ -1,6 +1,6 @@
 # Makefile for FWTCP
 PROG=	fwdec
-SRCS=	main.c fwdec.c
+SRCS=	main.c fwdec.c fwrule.c
 
 DPADD+=	${LIBSYS}
 LDADD+=	-lsys
