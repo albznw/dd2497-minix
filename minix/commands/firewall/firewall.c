@@ -14,9 +14,11 @@
 static void __dead
 usage(void) {
 	fprintf(stderr,
-	    "usage:\t%s\n\t   %s\n\n%s\n%s\n%s\n",
-	    "firewall -ADL [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW] [-u userID]",
+	    "usage:\n%s %s\n%s\n%s\n\n%s\n%s\n%s\n",
+	    "firewall -A [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW] [-u userID]",
 	    "chain_id index INC|OUT REJECT|ACCEPT start_ip [end_ip]",
+        "firewall -D chain_id index",
+        "firewall -L chain_id",
         "A userID is only used if adding/deleting rules to/from the privileged chain, and in this case it is required.",
         "If it is not specified it defaults to the calling user.",
         "For more information consult the manual using \"man firewall\"");
@@ -137,7 +139,15 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Error: The -L (List) option takes a single argument specifying the chain ID.\n\n");
             usage();        
         }
-    } else if(argc == 5 || argc == 6){
+    } else if (method == 2) {
+        if(argc != 2){
+            fprintf(stderr, "Error: The -D (Delete) option takes two arguments specifying the chain ID and the index.\n\n");
+            usage();        
+        }
+        // Parse index
+        // TODO5 Sanitize?
+        index = atoi(argv[1]);
+    } else if(argc == 5 || argc == 6){ // If we get here we are adding a rule
         if (chain_id == PRIVILEGED_CHAIN_ID && uid == -1) {
             // TODO5: set userID to calling user.
         }

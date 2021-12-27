@@ -29,7 +29,7 @@ void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
  */
 void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
   printf("Adding new rule %d %d %s\n\r", new_rule->type, new_rule->action,
-         new_rule->direction ? "OUT" : "IN");
+         new_rule->direction == OUT_RULE ? "OUT" : "IN");
 
   fw_chain_entry *c_entry = chain->head_entry;
   fw_chain_entry *new_entry = (fw_chain_entry *)malloc(sizeof(fw_chain_entry));
@@ -127,8 +127,11 @@ void remove_chain_rule(fw_chain *chain, int index) {
       break;
     }
     curr_entry = curr_entry->next;
+    curr_ind++;
   }
 
+  // TODO5: When adding rules through CLI and then trying to delete them something goes wrong. List still shows them, but
+  // trying to delete them now results in trying to free memory that has already been freed.
   if (curr_entry != NULL) {
     // Update the entry coming before the one we delete
     if (curr_entry->prev != NULL) {
