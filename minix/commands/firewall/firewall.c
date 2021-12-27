@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 
 #define	GETOPTSTR	"ADi:Ln:p:t:"
-
+// TODO5: userid needs to be sent in
 static void __dead
 usage(void) {
 	fprintf(stderr,
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
 
         // Parse start address
         if(!inet_pton(AF_INET, argv[4], &start_addr)) {
-            fprintf(stderr, "Error: Could not parse start ip \"%s\". Must be a valid ip address.\n\n", argv[2]);
+            fprintf(stderr, "Error: Could not parse start ip \"%s\". Must be a valid ip address.\n\n", argv[4]);
             usage();
         }
         start_addr = htonl(start_addr);
@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
         if(argc == 6){
             // Parse optional end address
             if(!inet_pton(AF_INET, argv[5], &end_addr)) {
-                fprintf(stderr, "Error: Could not parse end ip \"%s\". Must be a valid ip address.\n\n", argv[3]);
+                fprintf(stderr, "Error: Could not parse end ip \"%s\". Must be a valid ip address.\n\n", argv[5]);
                 usage();
             }
             end_addr = htonl(end_addr);

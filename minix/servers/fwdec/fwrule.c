@@ -28,7 +28,7 @@ void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
  * @param index wanted index
  */
 void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
-  printf("Adding new rule %d %d %s", new_rule->type, new_rule->action,
+  printf("Adding new rule %d %d %s\n\r", new_rule->type, new_rule->action,
          new_rule->direction ? "OUT" : "IN");
 
   fw_chain_entry *c_entry = chain->head_entry;

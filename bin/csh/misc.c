@@ -48,6 +48,7 @@ __RCSID("$NetBSD: misc.c,v 1.20 2013/07/16 17:47:43 christos Exp $");
 
 #include "csh.h"
 #include "extern.h"
+// TODO5: userid needs to be sent in
 
 static int renum(int, int);
 

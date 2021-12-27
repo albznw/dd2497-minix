@@ -12,6 +12,8 @@
 
 #define NO_UID (uid_t)0x10
 
+// TODO5: would probably be better to fix so that we can include fwctl.h instead
+// Must be same as the values defined in "minix/include/sys/fwctl.h"
 #define IN_RULE 1
 #define OUT_RULE 2
 

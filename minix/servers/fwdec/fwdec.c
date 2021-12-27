@@ -188,7 +188,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
     return LWIP_DROP_PACKET;
   }
 
-  //If a matching rule is found, and the actionis reject drop the packet
+  //If a matching rule is found, and the action is reject drop the packet
   if (matched_rule->action == FW_RULE_REJECT) {
     printf("Packet dropped - by rule - check_packet_match\n\r");
     log("Packet dropped\n\r");

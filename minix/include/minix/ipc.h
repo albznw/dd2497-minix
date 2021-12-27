@@ -263,12 +263,13 @@ typedef struct {
 	uint32_t ip_end; //4
 	uint16_t port; // 2
 	uint32_t chain_id; // 4
-	uint32_t index; // 4
+	int index; // 4
 	char p_name[16]; //16
 	uint8_t padding[11]; //11
 } mess_fwdec_rule;
 _ASSERT_MSG_SIZE(mess_fwdec_rule);*/
 
+// TODO5: index should be allowed to be negative
 typedef struct {
 	uint32_t method, ip_start, ip_end, uid, chain_id, index, direction, type, action, port;
 	char p_name[16]; 

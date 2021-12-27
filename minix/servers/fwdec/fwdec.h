@@ -21,8 +21,8 @@
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP 6
 
-#define FW_RULE_REJECT 1
-#define FW_RULE_ACCEPT 2
+#define FW_RULE_ACCEPT 1
+#define FW_RULE_REJECT 2
 
 #define FW_FLAG_ANY_IP 0x1
 #define FW_FLAG_IP_IN_RANGE 0x2
