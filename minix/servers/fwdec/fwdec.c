@@ -123,6 +123,40 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t action,
   return 0;
 }
 
+// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
+
+/**
+  Wrapper function to delete existing rules via the command line interface (CLI).
+*/
+int delete_rule(uint32_t chain_id, int index) {
+  printf("fwdec: removing rule\n\r");
+  switch (chain_id) {
+    case PRIVILEGED_CHAIN_ID:  //Delete rules for incoming packet
+      remove_chain_rule(priv_chain, index);
+      /*
+      remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
+                  *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+    case GLOBAL_CHAIN_ID:
+      remove_chain_rule(global_chain, index);
+      break;
+    case USER_CHAIN_ID:
+      remove_chain_rule(user_chain, index);
+      break;
+    default:
+      printf("ERROR: fwdec received an invalid chain ID to delete a rule from.\n\r");
+      break;
+      //Delete rules for outgoing packet
+      /*
+      remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
+                  *p_name != '\0' ? p_name : NULL);
+      */
+      break;
+  }
+  return 0;
+}
+
 /**
   Listing all existing rules
 */
@@ -145,37 +179,10 @@ void list_rules(int chain_id) {
   return;
 }
 
-// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
-
-/**
-  Wrapper function to delete existing rules via the command line interface (CLI).
-*/
-int delete_rule(uint8_t direction, uint8_t type, uint8_t action, 
-                uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name, 
-                uint32_t chain_id, int index, uint32_t uid) {
-  printf("fwdec: removing rule\n\r");
-  switch (direction) {
-    case 0:  //Delete rules for incoming packet
-      /*
-      remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
-                  *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-    default:  //Delete rules for outgoing packet
-      /*
-      remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
-                  *p_name != '\0' ? p_name : NULL);
-      */
-      break;
-  }
-  return 0;
-}
-
 /** 
   For every packet, check for matching rules that will either tell if the packet is allowed or dropped. If no rules
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
-
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid) {
   //printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);

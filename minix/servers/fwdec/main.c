@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
 
     switch (callnr) {
       //TODO5: possibly check that you are allowed to add rule
-      // TODO5: add userID
       case FWDEC_ADD_RULE:
         result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
                           m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
@@ -66,9 +65,7 @@ int main(int argc, char **argv) {
         break;
       //TODO5: possibly check that you are allowed to delete rule
       case FWDEC_DEL_RULE:
-        result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
-                             m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
-                             m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index, m.m_fwdec_rule.uid);
+        result = delete_rule(m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index);
         break;
       case FWDEC_LIST_RULES:
         list_rules(m.m_fwdec_rule.chain_id);

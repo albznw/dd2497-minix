@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
         fwdec_add_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index, uid);
         break;
     case 2:
-        fwdec_delete_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index, uid);
+        fwdec_delete_rule(chain_id, index);
         break;
     case 3:
         fwdec_list_rules(chain_id);
