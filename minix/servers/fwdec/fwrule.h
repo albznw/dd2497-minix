@@ -3,6 +3,7 @@
 
 #include "inc.h"
 
+// TODO5: remove priority
 #define MAX_PRIORITY 0xFF
 #define MED_PRIORITY 0xAA
 #define MIN_PRIORITY 0x00

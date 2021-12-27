@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 
     /* This is not for security since the SYSCALL will fail anyway. This just saves us from making a useless SYSCALL*/
 	if (geteuid() != 0) {
-		fprintf(stderr, "Neet root permissions to view or edit firewall rules.\n");
+		fprintf(stderr, "Need root permissions to view or edit firewall rules.\n");
         exit(1);
 	}
 
@@ -69,6 +69,7 @@ int main(int argc, char **argv) {
                 usage();
             }
             break;
+        // TODO5: remove priority
         case 'i':
             {
                 char* end;
