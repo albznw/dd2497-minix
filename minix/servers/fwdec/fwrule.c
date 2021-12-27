@@ -64,7 +64,7 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
       // Update entry that will be before the new entry (if new entry isn't first) to point forward to new entry
       if (tmp_prev != NULL) {
         tmp_prev->next = new_entry;
-      }
+      } // TODO5: if adding rule to first position head is not updated
       return;
     }
     c_index++;

@@ -13,6 +13,7 @@
 #define NO_UID (uid_t)0x10
 
 // TODO5: would probably be better to fix so that we can include fwctl.h instead
+// TODO5: maybe it works with <sys/fwctl.h> (see minix/commands/firewall/firewall.c) since it is already in include folder?
 // Must be same as the values defined in "minix/include/sys/fwctl.h"
 #define IN_RULE 1
 #define OUT_RULE 2

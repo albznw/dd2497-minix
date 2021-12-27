@@ -15,9 +15,11 @@
 #define PORT_ANY 0
 #define PNAME_ANY "\0"
 #define DIR_ANY 0
+// TODO5: since our root user is 0 and we never really need "any user" we should remove this.
 #define UID_ANY 0
 
 /* ID:s for the rule chains */
+// Must be same as the values defined in "minix/include/sys/fwctl.h"
 #define PRIVILEGED_CHAIN_ID 1
 #define GLOBAL_CHAIN_ID 2
 #define USER_CHAIN_ID 3
