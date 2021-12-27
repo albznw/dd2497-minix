@@ -96,27 +96,25 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   return (OK);
 }
 
-// TODO5: add userID
-
 /**
   Wrapper function to add new rules via the command line interface (CLI).
 */
 int add_rule(uint8_t direction, uint8_t type, uint8_t action,
              uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name, 
-             uint32_t chain_id, int index) {
+             uint32_t chain_id, int index, uint32_t uid) {
   printf("fwdec: adding rule\n\r");
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:
       insert_chain_rule(priv_chain, index, ip_start, ip_end, type,
-                       port, 0, action, *p_name != '\0' ? p_name : NULL, direction);
+                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     case GLOBAL_CHAIN_ID:
       insert_chain_rule(global_chain, index, ip_start, ip_end, type,
-                       port, 0, action, *p_name != '\0' ? p_name : NULL, direction);
+                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     case USER_CHAIN_ID:
       insert_chain_rule(user_chain, index, ip_start, ip_end, type,
-                       port, 0, action, *p_name != '\0' ? p_name : NULL, direction);
+                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     default: 
       printf("ERROR: fwdec received an invalid chain ID to add a rule to.\n\r");
@@ -154,7 +152,7 @@ void list_rules(int chain_id) {
 */
 int delete_rule(uint8_t direction, uint8_t type, uint8_t action, 
                 uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name, 
-                uint32_t chain_id, int index) {
+                uint32_t chain_id, int index, uint32_t uid) {
   printf("fwdec: removing rule\n\r");
   switch (direction) {
     case 0:  //Delete rules for incoming packet
