@@ -271,7 +271,8 @@ _ASSERT_MSG_SIZE(mess_fwdec_rule);*/
 
 // TODO5: index should be allowed to be negative
 typedef struct {
-	uint32_t method, ip_start, ip_end, uid, chain_id, index, direction, type, action, port;
+	uint32_t method, ip_start, ip_end, uid, chain_id, direction, type, action, port;
+	int index;
 	char p_name[16]; 
 	//uint8_t padding[11];
 } mess_fwdec_rule;

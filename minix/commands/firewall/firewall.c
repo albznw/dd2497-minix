@@ -9,14 +9,16 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define	GETOPTSTR	"ADi:Ln:p:t:"
+#define	GETOPTSTR	"ADLp:n:t:u:"
 // TODO5: userid needs to be sent in
 static void __dead
 usage(void) {
 	fprintf(stderr,
-	    "usage:\t%s\n\t   %s\n\n%s\n",
-	    "firewall -ADL [-i 0-255] [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW]",
+	    "usage:\t%s\n\t   %s\n\n%s\n%s\n%s\n",
+	    "firewall -ADL [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW] [-u userID]",
 	    "chain_id index INC|OUT REJECT|ACCEPT start_ip [end_ip]",
+        "A userID is only used if adding/deleting rules to/from the privileged chain, and in this case it is required.",
+        "If it is not specified it defaults to the calling user.",
         "For more information consult the manual using \"man firewall\"");
 	exit(1);
 }
@@ -30,7 +32,7 @@ int main(int argc, char **argv) {
     uint16_t port = 0;
     int index = 0;
     int chain_id = 0;
-    uid_t uid = 0; // TODO5: Is this the correct default value?
+    int uid = -1; // TODO5: Is this the correct default value?
     char name[16]; name[0] = '\0';
     char type_str[5];
     char direction_str[4];
@@ -70,16 +72,11 @@ int main(int argc, char **argv) {
             }
             break;
         // TODO5: remove priority
-        case 'i':
+        case 'u':
             {
-                char* end;
-                long number = strtoul(optarg, &end, 10);
-                if (*end == '\0' && number < 256){
-                    importance = number;
-                } else {
-                    fprintf(stderr, "Error: invalid importance \"%s\", must be 0-255.\n\n", optarg);
-                    usage();        
-                }
+                // Parse user id
+                // TODO5 Sanitize?
+                uid = atoi(optarg);
             }
             break;
         case 'n':
@@ -141,6 +138,9 @@ int main(int argc, char **argv) {
             usage();        
         }
     } else if(argc == 5 || argc == 6){
+        if (chain_id == PRIVILEGED_CHAIN_ID && uid == -1) {
+            // TODO5: set userID to calling user.
+        }
         // Parse index
         // TODO5 Sanitize?
         index = atoi(argv[1]);
@@ -198,10 +198,10 @@ int main(int argc, char **argv) {
 
     switch (method) {
     case 1:
-        fwdec_add_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index);
+        fwdec_add_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index, uid);
         break;
     case 2:
-        fwdec_delete_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index);
+        fwdec_delete_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index, uid);
         break;
     case 3:
         fwdec_list_rules(chain_id);

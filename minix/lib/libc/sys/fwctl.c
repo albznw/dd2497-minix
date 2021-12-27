@@ -5,7 +5,7 @@
 
 int fwdec_add_rule(uint8_t direction, uint8_t type, uint8_t action,
 						uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name, 
-						uint32_t chain_id, uint32_t index) {
+						uint32_t chain_id, int index, int uid) {
 	message m;
 	memset(&m, 0, sizeof(m));
 
