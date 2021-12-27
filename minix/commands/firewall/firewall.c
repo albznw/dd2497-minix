@@ -148,9 +148,9 @@ int main(int argc, char **argv) {
         // Parse direction
         strncpy(direction_str, argv[2], 4);
         if(strncmp(direction_str, "INC", 4) == 0) {
-            direction = INC_CHAIN;
+            direction = IN_RULE;
         } else if (strncmp(direction_str, "OUT", 4) == 0){
-            direction = OUT_CHAIN;
+            direction = OUT_RULE;
         } else {
             fprintf(stderr, "Error: did not recognize direction \"%s\". Should be either INC or OUT.\n\n",
                             argv[2]);
@@ -198,10 +198,10 @@ int main(int argc, char **argv) {
 
     switch (method) {
     case 1:
-        fwdec_add_rule(direction, type, importance, action, start_addr, end_addr, port, (char*) name);
+        fwdec_add_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index);
         break;
     case 2:
-        fwdec_delete_rule(direction, type, importance, action, start_addr, end_addr, port, (char*) name);
+        fwdec_delete_rule(direction, type, action, start_addr, end_addr, port, (char*) name, chain_id, index);
         break;
     case 3:
         fwdec_list_rules(chain_id);

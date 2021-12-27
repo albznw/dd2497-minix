@@ -35,10 +35,12 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
 
 int check_tcp_match(const uint32_t src_ip, const uint16_t port, const char* p_name, uint64_t flags, uint8_t direction, uid_t uid);
 
-int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
-             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
-int delete_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
-                uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name);
+int add_rule(uint8_t direction, uint8_t type, uint8_t action,
+             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
+			 uint32_t chain_id, int index);
+int delete_rule(uint8_t direction, uint8_t type, uint8_t action,
+                uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
+				uint32_t chain_id, int index);
 void list_rules(int chain_id);
 
 int sef_cb_init_fresh(int type, sef_init_info_t* info);

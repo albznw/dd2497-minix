@@ -57,17 +57,18 @@ int main(int argc, char **argv) {
     }
 
     switch (callnr) {
-      //TODO5 Updaate add_rule arguments (and possibly check that you are allowed to add rule)
+      //TODO5: possibly check that you are allowed to add rule
+      // TODO5: add userID
       case FWDEC_ADD_RULE:
-        printf("add_rule - should not run\n\r");
-        //result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
-        //                  m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+        result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
+                          m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
+                          m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index);
         break;
-      //TODO5 Updaate delete_rule arguments (and possibly check that you are allowed to delete rule)
+      //TODO5: possibly check that you are allowed to delete rule
       case FWDEC_DEL_RULE:
-        printf("delete_rule- should not run\n\r");
-        //result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
-        //                     m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+        result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
+                             m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
+                             m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index);
         break;
       case FWDEC_LIST_RULES:
         list_rules(m.m_fwdec_rule.chain_id);
