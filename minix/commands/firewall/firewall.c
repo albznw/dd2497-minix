@@ -10,7 +10,6 @@
 #include <arpa/inet.h>
 
 #define	GETOPTSTR	"ADLp:n:t:u:"
-// TODO5: userid needs to be sent in
 static void __dead
 usage(void) {
 	fprintf(stderr,
@@ -73,7 +72,6 @@ int main(int argc, char **argv) {
                 usage();
             }
             break;
-        // TODO5: remove priority
         case 'u':
             {
                 // Parse user id
@@ -151,6 +149,8 @@ int main(int argc, char **argv) {
         if (chain_id == PRIVILEGED_CHAIN_ID && uid == -1) {
             // TODO5: set userID to calling user.
         }
+        // TODO5: Global chain should override a potential UID and unset it (by setting it to -1)
+        // TODO5: User chain should always use self as UID
         // Parse index
         // TODO5 Sanitize?
         index = atoi(argv[1]);

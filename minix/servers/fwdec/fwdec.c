@@ -119,8 +119,6 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t action,
   return 0;
 }
 
-// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
-
 /**
   Wrapper function to delete existing rules via the command line interface (CLI).
 */

@@ -16,8 +16,6 @@
 // Must be same as the values defined in "minix/include/sys/fwctl.h"
 #define IN_RULE 1
 #define OUT_RULE 2
-// TODO5: Fix functionality for both ways
-//#define BOTH_WAYS 3
 
 /* Whether the rule states to accept or drop a matching packet */
 // TODO5: would probably be better to fix so that we can include fwctl.h instead
