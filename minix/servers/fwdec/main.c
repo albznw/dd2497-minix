@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   message m;
   int result;
 
-  uid_t effuid = 10;
+  int effuid = -1;
 
   /* SEF local startup. */
   env_setargs(argc, argv);

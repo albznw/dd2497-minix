@@ -30,8 +30,7 @@
 #define PORT_ANY 0
 #define PNAME_ANY "\0"
 #define DIR_ANY 0
-// TODO5: since our root user is 0 and we never really need "any user" we should remove this.
-#define UID_ANY 0
+#define UID_ANY -1
 // TODO5: NO_UID is currently unused; remove or start using?
 // #define NO_UID (uid_t)0x10
 
@@ -52,6 +51,9 @@ typedef struct fw_chain_rule {
   uint8_t type;
   uint8_t action;
   uint8_t direction;  // IN_RULE or OUT_RULE
+  // TODO5: Currently user ID is signed in most places but not in this struct and not when adding rules to it. 
+  // While a user ID should always be positive we want to be able to represent no particular user by using the ID -1.
+  // However, currently we have no need to add rules specifying "no particular user", so the rules are still saved with a signed user ID.
   uid_t user;
   uint32_t ip_start;
   uint32_t ip_end;
