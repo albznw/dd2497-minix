@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     uint16_t port = 0;
     int index = 0;
     int chain_id = 0;
-    int uid = -1; // TODO5: Is this the correct default value?
+    int uid = -1; // TODO5: Is this a correct default value?
     char name[16]; name[0] = '\0';
     char type_str[5];
     char direction_str[4];
@@ -146,11 +146,21 @@ int main(int argc, char **argv) {
         // TODO5 Sanitize?
         index = atoi(argv[1]);
     } else if(argc == 5 || argc == 6){ // If we get here we are adding a rule
+        // If we supply no userID when adding a rule to the privileged chain, we default to the calling user's ID.
         if (chain_id == PRIVILEGED_CHAIN_ID && uid == -1) {
-            // TODO5: set userID to calling user.
+            // TODO5: should we use endpoints instead?
+            uid = geteuid();
         }
-        // TODO5: Global chain should override a potential UID and unset it (by setting it to -1)
-        // TODO5: User chain should always use self as UID
+        //If the rule is added to the global chain, the rule should apply to everyone thus set the id to -1
+        if (chain_id == GLOBAL_CHAIN_ID)
+            uid = -1;
+
+        //Set the ID of the rule to the calling user's id    
+        if (chain_id == USER_CHAIN_ID) {
+            // TODO5: should we use endpoints instead?
+            uid = geteuid();
+        }
+                
         // Parse index
         // TODO5 Sanitize?
         index = atoi(argv[1]);
@@ -195,10 +205,10 @@ int main(int argc, char **argv) {
             end_addr = htonl(end_addr);
         }
     } else if (argc < 5){
-        fprintf(stderr, "Error: Too few arguments\n\n");
+        fprintf(stderr, "Error: Too few arguments given to the -A (Add) option. Expected 5 or 6 positional arguments.\n\n");
         usage();
     } else {
-        fprintf(stderr, "Error: Too many arguments\n\n");
+        fprintf(stderr, "Error: Too many arguments given to the -A (Add) option. Expected 5 or 6 positional arguments.\n\n");
         usage();
     }
 
