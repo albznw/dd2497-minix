@@ -81,7 +81,7 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
  * 
  * @param index wanted index
  */
-void insert_chain_rule(fw_chain *chain, int index, const uint32_t ip_start,
+void insert_chain_rule(fw_chain *chain, const int index, const uint32_t ip_start,
                        const uint32_t ip_end, const uint8_t type,
                        const uint16_t port, const uid_t uid,
                        const uint8_t action, const char *p_name,
@@ -152,7 +152,7 @@ void remove_chain_rule(fw_chain *chain, int index) {
 */
 fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
                                         const uint32_t ip_addr, const uint16_t port,
-                                        const char *p_name, const uint8_t direction, const uid_t uid) {
+                                        const char *p_name, const uint8_t direction, const int uid) {
   if (chain == NULL) {
     printf("WARN: Chain null - find_matching_chain_rule\n\r");
     return NULL;

@@ -177,7 +177,7 @@ void list_rules(int chain_id) {
   For every packet, check for matching rules that will either tell if the packet is allowed or dropped. If no rules
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
-int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid) {
+int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
   //printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);
 
@@ -203,7 +203,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
 }
 
 int check_tcp_match(const uint32_t src_ip, const uint16_t port,
-                    const char* p_name, uint64_t flags, uint8_t direction, uid_t uid) {
+                    const char* p_name, uint64_t flags, uint8_t direction, const int uid) {
   // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
   if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
     log("Packet dropped\n\r");
@@ -217,7 +217,7 @@ int check_tcp_match(const uint32_t src_ip, const uint16_t port,
 */
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                  const uint16_t src_port, const uint16_t dest_port,
-                 const char* p_name, const uint64_t flags, uid_t uid) {
+                 const char* p_name, const uint64_t flags, const int uid) {
   //printf("Checking packet - check_packet\n\r");
   int result;
 
