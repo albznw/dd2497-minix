@@ -6,13 +6,9 @@
 #include "fwdec.h"
 
 #include <fcntl.h>  //File handling flags
-#include <minix/com.h>
 #include <minix/fwtcp.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>  //System time
 #include <unistd.h>    //File handling
 
@@ -90,7 +86,7 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
   insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  print_chain_rules(global_chain);  
+  print_chain_rules(global_chain);
 
   printf("Firewall decision server started\n\r");
   return (OK);
@@ -100,23 +96,23 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   Wrapper function to add new rules via the command line interface (CLI).
 */
 int add_rule(uint8_t direction, uint8_t type, uint8_t action,
-             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name, 
+             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
              uint32_t chain_id, int index, uint32_t uid) {
   printf("fwdec: adding rule\n\r");
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:
       insert_chain_rule(priv_chain, index, ip_start, ip_end, type,
-                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     case GLOBAL_CHAIN_ID:
       insert_chain_rule(global_chain, index, ip_start, ip_end, type,
-                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     case USER_CHAIN_ID:
       insert_chain_rule(user_chain, index, ip_start, ip_end, type,
-                       port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
-    default: 
+    default:
       printf("ERROR: fwdec received an invalid chain ID to add a rule to.\n\r");
       break;
   }

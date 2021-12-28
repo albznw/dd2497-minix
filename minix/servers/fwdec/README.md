@@ -13,7 +13,7 @@ typedef struct fw_chain {
 } fw_chain;
 ```
 - The `head_entry` field refers to the first entry in every chain. If the chain is empty it's NULL.
-- The `chain_id` field specifies what type of chain it is. Possible values are found in `proto.h`.
+- The `chain_id` field specifies what type of chain it is. Possible values are found in `fwchain.h`.
 
 Every entry in a chain has this structure:
 
@@ -42,9 +42,9 @@ typedef struct fw_chain_rule {
 
 ```
 
-- The `type` field denotes the type of packet the rule matches (for instance TCP). The possible types are defined in `proto.h`. 
-- The `action` field refers to the action to perform when a rule is matched; the possible values can be found in `fwdec.h`. 
-- The `direction` field specifies if the rule matches incoming or outgoing packets; the possible values can be found in `fwrule.h`. 
+- The `type` field denotes the type of packet the rule matches (for instance TCP). The possible types are defined in `fwchain.h`. 
+- The `action` field refers to the action to perform when a rule is matched; the possible values can be found in `fwchain.h`. 
+- The `direction` field specifies if the rule matches incoming or outgoing packets; the possible values can be found in `fwchain.h`. 
 - The `user` field specifies the user ID of the user which the rule applies to.
 - The `ip_start` and `ip_end` fields refer to the start and end ranges for ip addresses.
 - The `port` field specifies which port the rule applies to.

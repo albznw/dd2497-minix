@@ -1,13 +1,6 @@
 #ifndef _FWDEC_H_
 #define _FWDEC_H_
 
-#include <minix/bitmap.h>
-#include <minix/config.h>
-#include <minix/ds.h>
-#include <minix/param.h>
-#include <regex.h>
-#include <sys/types.h>
-
 #define FWDEC_DEBUG  //Uncomment this line to enable debug output
 
 #define MODE_NOTSET 0
@@ -20,12 +13,6 @@
 #define IP_PROTO_UDP 17
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP 6
-
-// TODO5: would probably be better to fix so that we can include fwctl.h instead
-// TODO5: maybe it works with <sys/fwctl.h> (see minix/commands/firewall/firewall.c) since it is already in include folder?
-// Must be same as the values defined in "minix/include/sys/fwctl.h"
-#define FW_RULE_ACCEPT 1
-#define FW_RULE_REJECT 2
 
 #define FW_FLAG_ANY_IP 0x1
 #define FW_FLAG_IP_IN_RANGE 0x2

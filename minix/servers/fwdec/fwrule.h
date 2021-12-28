@@ -3,55 +3,6 @@
 
 #include "inc.h"
 
-// TODO5: remove priority
-#define MAX_PRIORITY 0xFF
-#define MED_PRIORITY 0xAA
-#define MIN_PRIORITY 0x00
-
-#define MAX_NAME_LEN 16
-
-#define NO_UID (uid_t)0x10
-
-// TODO5: would probably be better to fix so that we can include fwctl.h instead
-// TODO5: maybe it works with <sys/fwctl.h> (see minix/commands/firewall/firewall.c) since it is already in include folder?
-// Must be same as the values defined in "minix/include/sys/fwctl.h"
-#define IN_RULE 1
-#define OUT_RULE 2
-
-// TODO5: Fix functionality for both ways
-//#define BOTH_WAYS 3
-
-/**
-  Struct for individual rules
-*/
-typedef struct fw_chain_rule {
-  uint8_t type;
-  uint8_t action;
-  uint8_t direction;  // IN_RULE or OUT_RULE
-  uid_t user;
-  uint32_t ip_start;
-  uint32_t ip_end;
-  uint16_t port;
-  char p_name[MAX_NAME_LEN];
-} fw_chain_rule;
-
-/**
-  Struct for entries (rules) in a chain
-*/
-typedef struct fw_chain_entry {
-  struct fw_chain_rule *rule;
-  struct fw_chain_entry *prev;
-  struct fw_chain_entry *next;
-} fw_chain_entry;
-
-/**
-  Struct for chains that hold rules. Chain_id specify what type of chain it is 
-*/
-typedef struct fw_chain {
-  struct fw_chain_entry *head_entry;
-  uid_t chain_id;
-} fw_chain;
-
 void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr);
 
 void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index);

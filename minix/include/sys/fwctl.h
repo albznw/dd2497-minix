@@ -3,16 +3,17 @@
 
 #include <sys/types.h>
 
-// Must be same as the values defined in "minix/servers/fwdec/proto.h"
-// TODO5: would probably be better to fix so that we can include proto.h instead
+// Must be same as the values defined in "minix/servers/fwdec/fwchain.h"
+// TODO5: would probably be better to fix so that we can include fwchain.h instead
 #define PRIVILEGED_CHAIN_ID 1
 #define GLOBAL_CHAIN_ID 2
 #define USER_CHAIN_ID 3
 
-// Must be same as the values defined in "minix/servers/fwdec/fwrule.h"
+// Must be same as the values defined in "minix/servers/fwdec/fwchain.h"
 #define IN_RULE 1
 #define OUT_RULE 2
 
+// Must be same as the values defined in "minix/servers/fwdec/fwchain.h"
 #define ACCEPT_PACKET 1
 #define DROP_PACKET 2
 

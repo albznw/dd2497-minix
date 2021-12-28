@@ -1,28 +1,7 @@
 #ifndef _FWDEC_PROTO_H
 #define _FWDEC_PROTO_H
 
-#include <stdbool.h>
-
-#define FW_IP 1
-#define FW_TCP 2
-#define FW_UDP 3
-#define FW_ICMP 4
-#define FW_RAW 5
-
-/* Default values that matches any value if set. */
-#define TYPE_ANY 0
-#define IP_ANY 0
-#define PORT_ANY 0
-#define PNAME_ANY "\0"
-#define DIR_ANY 0
-// TODO5: since our root user is 0 and we never really need "any user" we should remove this.
-#define UID_ANY 0
-
-/* ID:s for the rule chains */
-// Must be same as the values defined in "minix/include/sys/fwctl.h"
-#define PRIVILEGED_CHAIN_ID 1
-#define GLOBAL_CHAIN_ID 2
-#define USER_CHAIN_ID 3
+#include <sys/types.h>
 
 /* Function prototypes. */
 
