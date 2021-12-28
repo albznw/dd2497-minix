@@ -235,46 +235,21 @@ typedef struct {
 } mess_fwdec_ip4;
 _ASSERT_MSG_SIZE(mess_fwdec_ip4);
 
-// TODO5: FIX message; desired structure doesn't work so we currently use bigger fields than needed.
-
-// Old structure
-/*typedef struct {
-	uint32_t method;
-	uint8_t direction;
-	uint8_t type;
-	uint8_t chain_id;
-	uint8_t action;
-	uint32_t ip_start;
-	uint32_t ip_end;
-	uint16_t port;
-	char p_name[16];
-	uint8_t padding[22];
-} mess_fwdec_rule;
-_ASSERT_MSG_SIZE(mess_fwdec_rule);
-
-// Desired structure
+// Appears like the size is allowed to be 56, 55, 54 or 53 bytes.
+// It also seems like it has to be aligned a certain way. We are not allowed to put the 3 uint8_t fields above any other field, 
+// unless we make it 4 uint8_t fields. Similarily we can't move the uint16_t field above any of the 4 byte fields.
+// Our working theory is that every field must be contained within a word of 4 bytes, meaning that if we place 3 bytes of uint8_t in one word
+// and the next field is 4 bytes it will skip the 1 remaning byte of the previous word, meaning we essentially lose 1 byte of space.
+// This appears to be the case for the entire message as well, meaning it is allowed to be upto 3 bytes less than intended, by simply checking that
+// the next item to be added would be at the correct spot (which it would if we discard the 3 remaining bytes of the last word).
 typedef struct {
-	uint32_t method; // 4
-	uint8_t direction; // 1
-	uint8_t type; // 1
-	uid_t uid; // 4?
-	uint8_t action; // 1
-	uint32_t ip_start; // 4
-	uint32_t ip_end; //4
-	uint16_t port; // 2
-	uint32_t chain_id; // 4
-	int index; // 4
-	char p_name[16]; //16
-	uint8_t padding[11]; //11
-} mess_fwdec_rule;
-_ASSERT_MSG_SIZE(mess_fwdec_rule);*/
-
-// TODO5: index should be allowed to be negative
-typedef struct {
-	uint32_t method, ip_start, ip_end, uid, chain_id, direction, type, action, port;
-	int index;
-	char p_name[16]; 
-	//uint8_t padding[11];
+	char p_name[16]; // 16 bytes
+	uint32_t method, ip_start, ip_end, chain_id; //16 bytes
+	int index; // 4 bytes
+	uid_t uid; // 4 bytes
+	uint16_t port; //2 bytes
+	uint8_t direction, type, action; //3 bytes
+	uint8_t padding[11]; // 11 bytes
 } mess_fwdec_rule;
 _ASSERT_MSG_SIZE(mess_fwdec_rule);
 
