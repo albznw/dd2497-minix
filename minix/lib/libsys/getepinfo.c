@@ -24,7 +24,7 @@ getepname(endpoint_t proc_ep, char * buf, int buf_len)
 int
 getepeffuid(endpoint_t proc_ep, uid_t * effuid)
 {
-	message m; /*m kommer fyllas med svaret*/
+	message m;
 	int r;
 
 	memset(&m, 0, sizeof(m));

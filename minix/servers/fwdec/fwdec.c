@@ -6,16 +6,11 @@
 #include "fwdec.h"
 
 #include <fcntl.h>  //File handling flags
-#include <minix/com.h>
 #include <minix/fwtcp.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>  //System time
 #include <unistd.h>    //File handling
-
 #include "fwrule.h"
 #include "inc.h"
 
@@ -82,61 +77,70 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   insert_chain_rule(priv_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
   print_chain_rules(priv_chain);
 
+  //Only for testing purposes, delete later
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_REJECT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
+  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  print_chain_rules(global_chain);
+
   printf("Firewall decision server started\n\r");
   return (OK);
 }
 
-// TODO5: FIX SO IT USES PUSH_CHAIN_RULE CORRECTLY
-
 /**
   Wrapper function to add new rules via the command line interface (CLI).
 */
-int add_rule(uint8_t direction, uint8_t type, uint8_t priority, uint8_t action,
-             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name) {
+int add_rule(uint8_t direction, uint8_t type, uint8_t action,
+             uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
+             uint32_t chain_id, int index, uint32_t uid) {
   printf("fwdec: adding rule\n\r");
-  switch (direction) {
-    case 0:  //Add rule to incoming packets
-      /*
-      push_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
-                *p_name != '\0' ? p_name : NULL);
-      */
+  switch (chain_id) {
+    case PRIVILEGED_CHAIN_ID:
+      insert_chain_rule(priv_chain, index, ip_start, ip_end, type,
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
-    default:  //Add rule to outgoing packets
-      /*
-      push_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
-                *p_name != '\0' ? p_name : NULL);
-      */
+    case GLOBAL_CHAIN_ID:
+      insert_chain_rule(global_chain, index, ip_start, ip_end, type,
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+      break;
+    case USER_CHAIN_ID:
+      insert_chain_rule(user_chain, index, ip_start, ip_end, type,
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+      break;
+    default:
+      printf("Error: fwdec received an invalid chain ID to add a rule to: %d\n\r", chain_id);
       break;
   }
   return 0;
 }
 
 /**
-  Listing all existing rules
-*/
-// TODO5: Fix functioanlity to list specific chain(s)
-void list_rules(void) {
-  print_chain_rules(priv_chain);
-  return;
-}
-
-// TODO5: FIX SO IT USES REMOVE_CHAIN_RULE CORRECTLY
-
-/**
   Wrapper function to delete existing rules via the command line interface (CLI).
 */
-int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
-                uint8_t action, uint32_t ip_start, uint32_t ip_end,
-                uint16_t port, char* p_name) {
+int delete_rule(uint32_t chain_id, int index) {
   printf("fwdec: removing rule\n\r");
-  switch (direction) {
-    case 0:  //Delete rules for incoming packet
+  switch (chain_id) {
+    case PRIVILEGED_CHAIN_ID:  //Delete rules for incoming packet
+      remove_chain_rule(priv_chain, index);
       /*
       remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
                   *p_name != '\0' ? p_name : NULL);
       */
       break;
-    default:  //Delete rules for outgoing packet
+    case GLOBAL_CHAIN_ID:
+      remove_chain_rule(global_chain, index);
+      break;
+    case USER_CHAIN_ID:
+      remove_chain_rule(user_chain, index);
+      break;
+    default:
+      printf("Error: fwdec received an invalid chain ID to delete a rule from: %d\n\r", chain_id);
+      break;
+      //Delete rules for outgoing packet
       /*
       remove_rule(&out_rules, ip_start, ip_end, type, port, priority, action,
                   *p_name != '\0' ? p_name : NULL);
@@ -146,12 +150,32 @@ int delete_rule(uint8_t direction, uint8_t type, uint8_t priority,
   return 0;
 }
 
+/**
+  Listing all existing rules
+*/
+void list_rules(int chain_id) {
+  switch (chain_id) {
+    case PRIVILEGED_CHAIN_ID:
+      print_chain_rules(priv_chain);
+      break;
+    case GLOBAL_CHAIN_ID:
+      print_chain_rules(global_chain);
+      break;
+    case USER_CHAIN_ID:
+      print_chain_rules(user_chain);
+      break;
+    default:
+      printf("Error: fwdec received an invalid chain ID to list rules from: %d\n\r", chain_id);
+      break;
+  }
+  return;
+}
+
 /** 
   For every packet, check for matching rules that will either tell if the packet is allowed or dropped. If no rules
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
-
-int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, uint8_t direction, uid_t uid) {
+int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
   //printf("Checking packet - check_packet_match\n\r");
   fw_chain_rule* matched_rule = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);
 
@@ -161,7 +185,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
     return LWIP_DROP_PACKET;
   }
 
-  //If a matching rule is found, and the actionis reject drop the packet
+  //If a matching rule is found, and the action is reject drop the packet
   if (matched_rule->action == FW_RULE_REJECT) {
     printf("Packet dropped - by rule - check_packet_match\n\r");
     log("Packet dropped\n\r");
@@ -177,7 +201,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
 }
 
 int check_tcp_match(const uint32_t src_ip, const uint16_t port,
-                    const char* p_name, uint64_t flags, uint8_t direction, uid_t uid) {
+                    const char* p_name, uint64_t flags, uint8_t direction, const int uid) {
   // Let the TCP server do TCP related analysis such as SYN-FLOOD prevention
   if (fwtcp_check_packet(src_ip, flags) != LWIP_KEEP_PACKET) {
     log("Packet dropped\n\r");
@@ -191,7 +215,7 @@ int check_tcp_match(const uint32_t src_ip, const uint16_t port,
 */
 int check_packet(const int type, const uint32_t src_ip, const uint32_t dest_ip,
                  const uint16_t src_port, const uint16_t dest_port,
-                 const char* p_name, const uint64_t flags, uid_t uid) {
+                 const char* p_name, const uint64_t flags, const int uid) {
   //printf("Checking packet - check_packet\n\r");
   int result;
 

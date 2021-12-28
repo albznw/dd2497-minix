@@ -806,11 +806,13 @@ int do_fwctl(void) {
 	m.m_type = job_m_in.m_fwdec_rule.method;
 	m.m_fwdec_rule.direction = job_m_in.m_fwdec_rule.direction;
 	m.m_fwdec_rule.type = job_m_in.m_fwdec_rule.type;
-	m.m_fwdec_rule.priority = job_m_in.m_fwdec_rule.priority;
+	m.m_fwdec_rule.uid = job_m_in.m_fwdec_rule.uid;
 	m.m_fwdec_rule.action = job_m_in.m_fwdec_rule.action;
 	m.m_fwdec_rule.ip_start = job_m_in.m_fwdec_rule.ip_start;
 	m.m_fwdec_rule.ip_end = job_m_in.m_fwdec_rule.ip_end;
 	m.m_fwdec_rule.port = job_m_in.m_fwdec_rule.port;
+	m.m_fwdec_rule.chain_id = job_m_in.m_fwdec_rule.chain_id;
+	m.m_fwdec_rule.index = job_m_in.m_fwdec_rule.index;
 	strncpy(m.m_fwdec_rule.p_name, job_m_in.m_fwdec_rule.p_name, 16);
 
 	int res = ipc_sendrec(FWDEC_PROC_NR, &m);

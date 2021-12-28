@@ -15,6 +15,7 @@
 #include <minix/const.h>
 #include <minix/ds.h>
 #include <minix/ipc.h>
+#include <minix/param.h>
 #include <minix/rs.h>
 #include <minix/sysinfo.h>
 #include <minix/syslib.h>
@@ -22,11 +23,15 @@
 #include <minix/type.h>
 #include <regex.h>
 #include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include "fwchain.h"
 #include "proto.h"
 #endif

@@ -1,9 +1,4 @@
 #include <minix/endpoint.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "inc.h" /* include master header file */
 
@@ -39,7 +34,7 @@ int main(int argc, char **argv) {
   message m;
   int result;
 
-  uid_t effuid = 10;
+  int effuid = UID_ANY;
 
   /* SEF local startup. */
   env_setargs(argc, argv);
@@ -57,28 +52,23 @@ int main(int argc, char **argv) {
     }
 
     switch (callnr) {
-      //TODO5 Updaate add_rule arguments (and possibly check that you are allowed to add rule)
       case FWDEC_ADD_RULE:
-        printf("add_rule - should not run\n\r");
-        result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
-                          m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+        result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
+                          m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
+                          m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index, m.m_fwdec_rule.uid);
         break;
-      //TODO5 Updaate delete_rule arguments (and possibly check that you are allowed to delete rule)
       case FWDEC_DEL_RULE:
-        printf("delete_rule- should not run\n\r");
-        result = delete_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.priority, m.m_fwdec_rule.action,
-                             m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name);
+        result = delete_rule(m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index);
         break;
       case FWDEC_LIST_RULES:
-        list_rules();
+        list_rules(m.m_fwdec_rule.chain_id);
         result = OK;
         break;
       default:
         if (m.m_fwdec_ip4.user_endp) {
-          // TODO5: Document what is their purpose
-          getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);  // cannot fail
-          getepeffuid(m.m_fwdec_ip4.user_endp, &effuid);      // TODO: NOW IF THIS FAILS, effuid still root => 0
-          //printf("uid: %d \n", effuid);
+          // Get process name and effective user ID
+          getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);
+          getepeffuid(m.m_fwdec_ip4.user_endp, &effuid);
         }
         src_ip = m.m_fwdec_ip4.src_ip;
         dest_ip = m.m_fwdec_ip4.dest_ip;

@@ -1,13 +1,6 @@
 #ifndef _FWDEC_H_
 #define _FWDEC_H_
 
-#include <minix/bitmap.h>
-#include <minix/config.h>
-#include <minix/ds.h>
-#include <minix/param.h>
-#include <regex.h>
-#include <sys/types.h>
-
 #define FWDEC_DEBUG  //Uncomment this line to enable debug output
 
 #define MODE_NOTSET 0
@@ -20,9 +13,6 @@
 #define IP_PROTO_UDP 17
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP 6
-
-#define FW_RULE_REJECT 1
-#define FW_RULE_ACCEPT 2
 
 #define FW_FLAG_ANY_IP 0x1
 #define FW_FLAG_IP_IN_RANGE 0x2

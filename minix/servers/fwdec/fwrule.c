@@ -1,11 +1,5 @@
 #include "fwrule.h"
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "fwdec.h"
 #include "inc.h"
 
 /**
@@ -28,8 +22,8 @@ void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
  * @param index wanted index
  */
 void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
-  printf("Adding new rule %d %d %s", new_rule->type, new_rule->action,
-         new_rule->direction ? "OUT" : "IN");
+  printf("Adding new rule %d %d %s\n\r", new_rule->type, new_rule->action,
+         new_rule->direction == OUT_RULE ? "OUT" : "IN");
 
   fw_chain_entry *c_entry = chain->head_entry;
   fw_chain_entry *new_entry = (fw_chain_entry *)malloc(sizeof(fw_chain_entry));
@@ -64,6 +58,9 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
       // Update entry that will be before the new entry (if new entry isn't first) to point forward to new entry
       if (tmp_prev != NULL) {
         tmp_prev->next = new_entry;
+      } else {
+        // The new entry will be the first entry of the chain
+        chain->head_entry = new_entry;
       }
       return;
     }
@@ -84,7 +81,7 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
  * 
  * @param index wanted index
  */
-void insert_chain_rule(fw_chain *chain, int index, const uint32_t ip_start,
+void insert_chain_rule(fw_chain *chain, const int index, const uint32_t ip_start,
                        const uint32_t ip_end, const uint8_t type,
                        const uint16_t port, const uid_t uid,
                        const uint8_t action, const char *p_name,
@@ -120,13 +117,14 @@ void remove_chain_rule(fw_chain *chain, int index) {
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL) {
-      printf("ERROR! When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
+      printf("Error: When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
       return;
     }
     if (curr_ind == index) {
       break;
     }
     curr_entry = curr_entry->next;
+    curr_ind++;
   }
 
   if (curr_entry != NULL) {
@@ -154,7 +152,7 @@ void remove_chain_rule(fw_chain *chain, int index) {
 */
 fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
                                         const uint32_t ip_addr, const uint16_t port,
-                                        const char *p_name, const uint8_t direction, const uid_t uid) {
+                                        const char *p_name, const uint8_t direction, const int uid) {
   if (chain == NULL) {
     printf("WARN: Chain null - find_matching_chain_rule\n\r");
     return NULL;
@@ -190,13 +188,14 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
  * Print the specified chain of rules.
  */
 void print_chain_rules(fw_chain *chain) {
+  printf("Printing rules for chain %d\n\r", chain->chain_id);
   printf("%-5s%-8s%-10s%-8s%-16s%-16s%-6s%-16s\n\r", "type", "action", "direction", "user ID",
          "start", "end", "port", "name");
   fw_chain_entry *curr_entry = chain->head_entry;
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL) {
-      printf("ERROR! Chain-entry without an associated rule was found!\n\r");
+      printf("Error: When trying to list rules a chain-entry without an associated rule was found!\n\r");
       return;
     }
 
@@ -207,7 +206,7 @@ void print_chain_rules(fw_chain *chain) {
     char direction_str[10];
     get_ip_string(start_ip_str, 64, curr_rule->ip_start);
     get_ip_string(end_ip_str, 64, curr_rule->ip_end);
-    if (curr_rule->action == 1) {
+    if (curr_rule->action == FW_RULE_REJECT) {
       strncpy(action, "REJECT", 7);
     } else {
       strncpy(action, "ACCEPT", 7);
