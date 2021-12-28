@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <sys/time.h>  //System time
 #include <unistd.h>    //File handling
-
 #include "fwrule.h"
 #include "inc.h"
 
@@ -113,7 +112,7 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t action,
                         port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
       break;
     default:
-      printf("ERROR: fwdec received an invalid chain ID to add a rule to.\n\r");
+      printf("Error: fwdec received an invalid chain ID to add a rule to: %d\n\r", chain_id);
       break;
   }
   return 0;
@@ -139,7 +138,7 @@ int delete_rule(uint32_t chain_id, int index) {
       remove_chain_rule(user_chain, index);
       break;
     default:
-      printf("ERROR: fwdec received an invalid chain ID to delete a rule from.\n\r");
+      printf("Error: fwdec received an invalid chain ID to delete a rule from: %d\n\r", chain_id);
       break;
       //Delete rules for outgoing packet
       /*
@@ -166,8 +165,7 @@ void list_rules(int chain_id) {
       print_chain_rules(user_chain);
       break;
     default:
-      // TODO5: update to print on stderr
-      printf("Error: Invalid chain ID: %d", chain_id);
+      printf("Error: fwdec received an invalid chain ID to list rules from: %d\n\r", chain_id);
       break;
   }
   return;

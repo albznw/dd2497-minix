@@ -31,8 +31,6 @@
 #define PNAME_ANY "\0"
 #define DIR_ANY 0
 #define UID_ANY -1
-// TODO5: NO_UID is currently unused; remove or start using?
-// #define NO_UID (uid_t)0x10
 
 /* ID:s for the rule chains */
 // Must be same as the values defined in "minix/include/sys/fwctl.h"

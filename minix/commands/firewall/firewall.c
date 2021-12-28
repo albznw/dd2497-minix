@@ -1,4 +1,3 @@
-
 #include <sys/fwctl.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -12,6 +11,7 @@
 #define	GETOPTSTR	"ADLp:n:t:u:"
 static void __dead
 usage(void) {
+    // TODO5: Update firewall man page
 	fprintf(stderr,
 	    "usage:\n%s %s\n%s\n%s\n\n%s\n%s\n%s\n",
 	    "firewall -A [-p port] [-n pname] [-t IP|TCP|UDP|ICMP|RAW] [-u userID]",

@@ -117,7 +117,7 @@ void remove_chain_rule(fw_chain *chain, int index) {
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL) {
-      printf("ERROR! When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
+      printf("Error: When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
       return;
     }
     if (curr_ind == index) {
@@ -195,7 +195,7 @@ void print_chain_rules(fw_chain *chain) {
   while (curr_entry != NULL) {
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL) {
-      printf("ERROR! Chain-entry without an associated rule was found!\n\r");
+      printf("Error: When trying to list rules a chain-entry without an associated rule was found!\n\r");
       return;
     }
 
