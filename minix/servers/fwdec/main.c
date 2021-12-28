@@ -66,10 +66,9 @@ int main(int argc, char **argv) {
         break;
       default:
         if (m.m_fwdec_ip4.user_endp) {
-          // TODO5: Document what is their purpose
-          getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);  // cannot fail
-          getepeffuid(m.m_fwdec_ip4.user_endp, &effuid);      // TODO: NOW IF THIS FAILS, effuid still root => 0
-          //printf("uid: %d \n", effuid);
+          // Get process name and effective user ID
+          getepname(m.m_fwdec_ip4.user_endp, proc_name, 16);
+          getepeffuid(m.m_fwdec_ip4.user_endp, &effuid);
         }
         src_ip = m.m_fwdec_ip4.src_ip;
         dest_ip = m.m_fwdec_ip4.dest_ip;

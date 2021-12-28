@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
         index = atoi(argv[1]);
     } else if(argc == 5 || argc == 6){ // If we get here we are adding a rule
         // If we supply no userID when adding a rule to the privileged chain, we default to the calling user's ID.
-        if (chain_id == PRIVILEGED_CHAIN_ID && uid == -1) {
+        if (chain_id == PRIVILEGED_CHAIN_ID && uid < 0) {
             // TODO5: should we use endpoints instead?
             uid = geteuid();
         }
