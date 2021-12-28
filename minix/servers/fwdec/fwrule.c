@@ -64,7 +64,10 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
       // Update entry that will be before the new entry (if new entry isn't first) to point forward to new entry
       if (tmp_prev != NULL) {
         tmp_prev->next = new_entry;
-      } // TODO5: if adding rule to first position head is not updated
+      } else {
+        // The new entry will be the first entry of the chain
+        chain->head_entry = new_entry;
+      }
       return;
     }
     c_index++;
@@ -130,8 +133,6 @@ void remove_chain_rule(fw_chain *chain, int index) {
     curr_ind++;
   }
 
-  // TODO5: When adding rules through CLI and then trying to delete them something goes wrong. List still shows them, but
-  // trying to delete them now results in trying to free memory that has already been freed.
   if (curr_entry != NULL) {
     // Update the entry coming before the one we delete
     if (curr_entry->prev != NULL) {
@@ -211,7 +212,7 @@ void print_chain_rules(fw_chain *chain) {
     char direction_str[10];
     get_ip_string(start_ip_str, 64, curr_rule->ip_start);
     get_ip_string(end_ip_str, 64, curr_rule->ip_end);
-    if (curr_rule->action == 1) {
+    if (curr_rule->action == FW_RULE_REJECT) {
       strncpy(action, "REJECT", 7);
     } else {
       strncpy(action, "ACCEPT", 7);

@@ -21,6 +21,9 @@
 #define IP_PROTO_UDPLITE 136
 #define IP_PROTO_TCP 6
 
+// TODO5: would probably be better to fix so that we can include fwctl.h instead
+// TODO5: maybe it works with <sys/fwctl.h> (see minix/commands/firewall/firewall.c) since it is already in include folder?
+// Must be same as the values defined in "minix/include/sys/fwctl.h"
 #define FW_RULE_ACCEPT 1
 #define FW_RULE_REJECT 2
 

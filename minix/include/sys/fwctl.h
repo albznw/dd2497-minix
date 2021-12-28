@@ -13,8 +13,8 @@
 #define IN_RULE 1
 #define OUT_RULE 2
 
-#define DROP_PACKET 1
-#define ACCEPT_PACKET 2
+#define ACCEPT_PACKET 1
+#define DROP_PACKET 2
 
 int fwdec_add_rule(uint8_t direction, uint8_t type, uint8_t action,
 						uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
