@@ -195,7 +195,6 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Error: Could not parse start ip \"%s\". Must be a valid ip address.\n\n", argv[4]);
             usage();
         }
-        start_addr = htonl(start_addr);
 
         if(argc == 6){
             // Parse optional end address
@@ -203,7 +202,6 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "Error: Could not parse end ip \"%s\". Must be a valid ip address.\n\n", argv[5]);
                 usage();
             }
-            end_addr = htonl(end_addr);
         }
     } else if (argc < 5){
         fprintf(stderr, "Error: Too few arguments given to the -A (Add) option. Expected 5 or 6 positional arguments.\n\n");

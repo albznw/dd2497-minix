@@ -185,19 +185,22 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
     //  otherwise return null ( = no rule matching)
     if (
         (c_entry->rule->type == TYPE_ANY || c_entry->rule->type == type) &&
-        ((c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY) ||
-         (c_entry->rule->ip_start <= ip_addr && c_entry->rule->ip_end >= ip_addr)) &&
+        ((c_entry->rule->ip_start == IP_ANY && c_entry->rule->ip_end == IP_ANY) || is_ip_in_range(ip_addr, c_entry->rule->ip_start, c_entry->rule->ip_end)) &&
         (c_entry->rule->port == PORT_ANY || c_entry->rule->port == port) &&
         (strcmp(c_entry->rule->p_name, PNAME_ANY) == 0 || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name) == 0)) &&
         (c_entry->rule->user == NO_USER_ID || c_entry->rule->user == uid) &&
         (c_entry->rule->direction == DIR_ANY || c_entry->rule->direction == direction)) {
-      printf("Found matching rule\n\r");
+      char prettyip_start_rule[64], prettyip_end_rule[64];
+      get_ip_string(prettyip_start_rule, 64, c_entry->rule->ip_start);
+      get_ip_string(prettyip_end_rule, 64, c_entry->rule->ip_end);
+
+      printf("Found matching rule: user(%d) check_ip(%s) ip(%s-%s) type(%d) name(%s) dir(%s) action(%d)\r\n", c_entry->rule->user, prettyip, prettyip_start_rule, prettyip_end_rule, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction == DIR_ANY ? "ANY" : c_entry->rule->direction == IN_RULE ? "IN" : "OUT", c_entry->rule->action);
       return c_entry->rule;
     }
     c_entry = c_entry->next;
   }
 
-  printf("Could not find matching rule\n\r");
+  printf("Could not find matching rule: type(%d) ip(%d) prettyip(%s) port(%d) name(%s), dir(%d), uid(%d)\r\n", type, ip_addr, prettyip, port, (p_name == NULL ? "" : p_name), direction, uid);
   return NULL;
 }
 
