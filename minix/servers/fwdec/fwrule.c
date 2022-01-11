@@ -146,6 +146,16 @@ void remove_chain_rule(fw_chain *chain, int index) {
   }
 }
 
+/**
+ * Minix saves the ipaddresses flipped, meaning that the last octet is saved 
+ * as the most significant bits. This function flips it back so that we can
+ * compare ip ranges with an ip address.
+ */
+uint32_t flip_ip(const uint32_t ip_addr){
+  return ( ( ip_addr >> 24 ) & 0x000000FF ) | ( ( ip_addr >>  8 ) & 0x0000FF00 )
+    | ( ( ip_addr <<  8 ) & 0x00FF0000 ) | ( ( ip_addr << 24 ) & 0xFF000000 );
+}
+
 /**  
   TODO5: Document what this function does, and how it works once it has been fixed to work 
   for multiple chains.
