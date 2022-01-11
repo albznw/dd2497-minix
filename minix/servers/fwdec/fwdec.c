@@ -62,29 +62,20 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   uint32_t youtube = ip4_from_parts(216, 58, 211, 14);
 
   uint32_t localhost = ip4_from_parts(127, 0, 0, 1);
-  uint32_t internal_low = ip4_from_parts(10, 0, 2, 0);
-  uint32_t internal_high = ip4_from_parts(10, 0, 2, 255);
-
-  print_chain_rules(priv_chain);
+  uint32_t internal_low = ip4_from_parts(10, 0, 0, 0);
+  uint32_t internal_high = ip4_from_parts(10, 0, 255, 255); 
 
   printf("Setting up rules\n\r");
-  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_REJECT, NULL, OUT_RULE);
-  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(priv_chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(priv_chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(priv_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(priv_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
-  insert_chain_rule(priv_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 1000, DROP_PACKET, NULL, OUT_RULE);
   print_chain_rules(priv_chain);
 
   //Only for testing purposes, delete later
-  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 1000, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, 0, FW_RULE_REJECT, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, 0, FW_RULE_ACCEPT, NULL, IN_RULE);
-  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, 0, FW_RULE_ACCEPT, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, NO_USER_ID, DROP_PACKET, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
+  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, IN_RULE);
+  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
   print_chain_rules(global_chain);
 
   printf("Firewall decision server started\n\r");

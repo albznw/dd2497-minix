@@ -1,5 +1,4 @@
 #include "fwrule.h"
-
 #include "inc.h"
 
 /**
@@ -177,9 +176,8 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
   fw_chain_entry *c_entry = chain->head_entry;
   char prettyip[64];
   get_ip_string(prettyip, 64, ip_addr);
-  printf("Params: type(%d) ip(%d) prettyip(%s) port(%d) name(%s), dir(%d), id(%d)\r\n", type, ip_addr, prettyip, port, (p_name == NULL ? "" : p_name), direction, uid);
+
   while (c_entry != NULL) {
-    printf("Checking rule: user(%d) ip(%d-%d) type(%d) name(%s) dir(%d) action(%d)\n\r", c_entry->rule->user, c_entry->rule->ip_start, c_entry->rule->ip_end, c_entry->rule->type, c_entry->rule->p_name, c_entry->rule->direction, c_entry->rule->action);
 
     //  Check for every rule that the arguments match, if a match is found return rule
     //  otherwise return null ( = no rule matching)
@@ -226,7 +224,7 @@ void print_chain_rules(fw_chain *chain) {
     char direction_str[10];
     get_ip_string(start_ip_str, 64, curr_rule->ip_start);
     get_ip_string(end_ip_str, 64, curr_rule->ip_end);
-    if (curr_rule->action == FW_RULE_REJECT) {
+    if (curr_rule->action == DROP_PACKET) {
       strncpy(action, "REJECT", 7);
     } else {
       strncpy(action, "ACCEPT", 7);
