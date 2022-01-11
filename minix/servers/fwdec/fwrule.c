@@ -189,7 +189,7 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
          (c_entry->rule->ip_start <= ip_addr && c_entry->rule->ip_end >= ip_addr)) &&
         (c_entry->rule->port == PORT_ANY || c_entry->rule->port == port) &&
         (strcmp(c_entry->rule->p_name, PNAME_ANY) == 0 || (p_name != NULL && strcmp(c_entry->rule->p_name, p_name) == 0)) &&
-        (c_entry->rule->user == UID_ANY || c_entry->rule->user == uid) &&
+        (c_entry->rule->user == NO_USER_ID || c_entry->rule->user == uid) &&
         (c_entry->rule->direction == DIR_ANY || c_entry->rule->direction == direction)) {
       printf("Found matching rule\n\r");
       return c_entry->rule;

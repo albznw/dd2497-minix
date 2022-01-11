@@ -3,6 +3,8 @@
 
 #include <sys/types.h>
 
+#define NO_USER_ID 999
+
 // Must be same as the values defined in "minix/servers/fwdec/fwchain.h"
 // TODO5: would probably be better to fix so that we can include fwchain.h instead
 #define PRIVILEGED_CHAIN_ID 1
