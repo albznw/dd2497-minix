@@ -171,24 +171,66 @@ void list_rules(int chain_id) {
   return;
 }
 
+
+/**
+ * Checks the incoming packet for matches against the privileged- and global 
+ * chains. This function follows a blacklist approach and will reject the packet
+ * by default if no rule is found. 
+ */
+int check_super(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
+  // First, check the privileged chain for matches. If found, return rule action
+  fw_chain_rule* privileged_chain_match = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);
+
+  if (privileged_chain_match != NULL) {
+    return privileged_chain_match->action;
+  }
+
+  // Second, check the global chain for matches. If found, return rule action
+  fw_chain_rule* global_chain_match = find_matching_chain_rule(global_chain, type, src_ip, port, p_name, direction, uid);
+
+  if(global_chain_match != NULL) {
+    return global_chain_match->action;
+  }
+
+  // Follow a blacklist approach by always rejecting packets if no rule was found
+  return DROP_PACKET;
+}
+
+
+/**
+ * Checks the incoming packet for matches against the user chain. This function * follows a whitelist approach and will reject the packet by default if no
+ * rule is found. 
+ */
+int check_user(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
+  fw_chain_rule* user_chain_match = find_matching_chain_rule(user_chain, type, src_ip, port, p_name, direction, uid);
+
+  if(user_chain_match != NULL) {
+    return user_chain_match->action;
+  }
+
+  return ACCEPT_PACKET;
+}
+
 /** 
   For every packet, check for matching rules that will either tell if the packet is allowed or dropped. If no rules
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
-  //printf("Checking packet - check_packet_match\n\r");
-  fw_chain_rule* matched_rule = find_matching_chain_rule(priv_chain, type, src_ip, port, p_name, direction, uid);
+  printf("Checking packet - check_packet_match\n\r");
 
-  // Whitelist firewall drops packets if no matching rule is found
-  if (matched_rule == NULL) {
-    printf("Packet dropped - no rule - check_packet_match\n\r");
+  // Check blacklists
+  int super_result = check_super(type, src_ip, port, p_name, direction, uid);
+
+  if (super_result == DROP_PACKET) {
+    printf("Packet dropped by super chain\r\n");
     return LWIP_DROP_PACKET;
   }
 
-  //If a matching rule is found, and the action is reject drop the packet
-  if (matched_rule->action == FW_RULE_REJECT) {
-    printf("Packet dropped - by rule - check_packet_match\n\r");
-    log("Packet dropped\n\r");
+  // Check whitelist
+  int user_result = check_user(type, src_ip, port, p_name, direction, uid);
+
+  if (user_result == DROP_PACKET) {
+    printf("Packet dropped by user chain\r\n");
     return LWIP_DROP_PACKET;
   }
 
@@ -196,7 +238,6 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
   char prettyip[64];
   get_ip_string(prettyip, 64, src_ip);
   printf("Packet kept - dir(%d) prettyip(%s) type(%d)\n\r", direction, prettyip, type);
-  log("Packet accepted\n\r");
   return LWIP_KEEP_PACKET;
 }
 
