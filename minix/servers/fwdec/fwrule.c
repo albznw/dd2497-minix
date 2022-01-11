@@ -156,6 +156,13 @@ uint32_t flip_ip(const uint32_t ip_addr){
     | ( ( ip_addr <<  8 ) & 0x00FF0000 ) | ( ( ip_addr << 24 ) & 0xFF000000 );
 }
 
+/**
+ * Checks whether or not a specified IP address is within an IP address range.
+ */
+int is_ip_in_range(const uint32_t ip_addr, const uint32_t ip_addr_start, const uint32_t ip_addr_end){
+  return flip_ip(ip_addr_start) <= flip_ip(ip_addr) && flip_ip(ip_addr) <= flip_ip(ip_addr_end);
+}
+
 /**  
   TODO5: Document what this function does, and how it works once it has been fixed to work 
   for multiple chains.
