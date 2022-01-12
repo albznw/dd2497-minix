@@ -54,9 +54,9 @@ The firewall uses 3 different chains with rules to check whether or not a packet
 is allowd in or out. When a packet is going in or out from the system it will
 traverse the chains in the following order:
 
-1. Privileged chain
-2. Global chain
-3. User chain
+1. Privileged chain (P)
+2. Global chain (G)
+3. User chain (U)
 
 The firewall will first check the privileged- and the global chain for matching
 rules. If no `ALLOW` or `REJECT` rules was found. The packet will simply be dropped
@@ -85,7 +85,7 @@ adding the new rule, make sure you are logged in as root.
 In this example we will add the rule to the global chain without a user id. This way the rule will affect all users.
 
 ```sh
-$ firewall -A 2 0 OUT ACCEPT 216.58.207.206
+$ firewall -A G 0 OUT ACCEPT 216.58.207.206
 ```
 
 Now, check if you can ping `www.youtube.com`. You should be able to.
@@ -99,14 +99,14 @@ $ ping -c 1 216.58.207.206
 Delete the global rule created earlier (deletes at index 0, where it was added):
 
 ```sh
-$ firewall -D 2 0
+$ firewall -D G 0
 ```
 
 Now no user can access `www.youtube.com`
 
 Make it possible for root to access. Must add to the privileged chain. 
 ```sh
-$ firewall -A --user-id 0 1 0 OUT ACCEPT 216.58.207.206
+$ firewall -A --user-id 0 P 0 OUT ACCEPT 216.58.207.206
 ```
 
 The ping should now work.
@@ -124,7 +124,7 @@ $ id foo
 
 As root, make foo able to communicate to `www.youtube.com`. (our case: foo id = 1000) Add to the privileged chain.
 ```sh
-$ firewall -A --user-id 1000 1 0 OUT ACCEPT 216.58.207.206
+$ firewall -A --user-id 1000 P 0 OUT ACCEPT 216.58.207.206
 ```
 
 Foo is now able to ping `www.youtube.com`. If the previous command is not made (or removed), the ping would not be successful. 
@@ -133,6 +133,15 @@ $ su foo
 $ ping -c 1 216.58.207.206
 ```
 
-Foo cannot remove rules from the chains.
+Foo may add rules to the user chain. In this case to restrict access.  
+```sh
+$ firewall -A U 0 OUT REJECT 216.58.207.206
+```
+Foo cannot ping `www.youtube.com` anymore. 
+```sh
+$ su foo
+$ ping -c 1 216.58.207.206
+```
+
 
 
