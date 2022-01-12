@@ -88,7 +88,7 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
 int add_rule(uint8_t direction, uint8_t type, uint8_t action,
              uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
              uint32_t chain_id, int index, uint32_t uid) {
-  printf("fwdec: adding rule\n\r");
+  //printf("fwdec: adding rule\n\r");
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:
       insert_chain_rule(priv_chain, index, ip_start, ip_end, type,
@@ -207,7 +207,7 @@ int check_user(const uint8_t type, const uint32_t src_ip, const uint16_t port, c
   are found, drop said packet. Otherwise follow the action that is listed by a matching rule.
 */
 int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t port, const char* p_name, const uint8_t direction, const int uid) {
-  printf("Checking packet - check_packet_match\n\r");
+  //printf("Checking packet - check_packet_match\n\r");
 
   // Check blacklists
   int super_result = check_super(type, src_ip, port, p_name, direction, uid);
@@ -228,7 +228,7 @@ int check_packet_match(const uint8_t type, const uint32_t src_ip, const uint16_t
   //If we reach this point, allow packet
   char prettyip[64];
   get_ip_string(prettyip, 64, src_ip);
-  printf("Packet kept - dir(%d) prettyip(%s) type(%d)\n\r", direction, prettyip, type);
+  //printf("Packet kept - dir(%d) prettyip(%s) type(%d)\n\r", direction, prettyip, type);
   return LWIP_KEEP_PACKET;
 }
 
