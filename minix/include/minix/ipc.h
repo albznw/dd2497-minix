@@ -243,13 +243,14 @@ _ASSERT_MSG_SIZE(mess_fwdec_ip4);
 // This appears to be the case for the entire message as well, meaning it is allowed to be upto 3 bytes less than intended, by simply checking that
 // the next item to be added would be at the correct spot (which it would if we discard the 3 remaining bytes of the last word).
 typedef struct {
+	endpoint_t user_endp; /* User level endpoint */
 	char p_name[16]; // 16 bytes
 	uint32_t method, ip_start, ip_end, chain_id; //16 bytes
 	int index; // 4 bytes
 	uid_t uid; // 4 bytes
 	uint16_t port; //2 bytes
 	uint8_t direction, type, action; //3 bytes
-	uint8_t padding[11]; // 11 bytes
+	uint8_t padding[7]; // 7 bytes
 } mess_fwdec_rule;
 _ASSERT_MSG_SIZE(mess_fwdec_rule);
 

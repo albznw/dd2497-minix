@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   message m;
   int result;
 
-  int effuid = UID_ANY;
+  uid_t effuid;
 
   /* SEF local startup. */
   env_setargs(argc, argv);
@@ -44,13 +44,30 @@ int main(int argc, char **argv) {
   while (TRUE) {
     /* Wait for incoming message, sets 'callnr' and 'who'. */
     get_work(&m);
-
     if (is_notify(callnr)) {
       printf("fwdec: warning, got illegal notify from: %d\n", m.m_source);
       result = EINVAL;
       goto send_reply;
     }
 
+    switch (callnr) {
+      case FWDEC_ADD_RULE:
+      case FWDEC_DEL_RULE:
+      case FWDEC_LIST_RULES:
+      {
+        // Ensure an unprivileged user only performs actions on the user chain. 
+        getepeffuid(m.m_fwdec_rule.user_endp, &effuid);
+
+        if(m.m_fwdec_rule.chain_id != USER_CHAIN_ID){
+          if(effuid != 0){
+            printf("fwdec: error, user attempting to modify super chains");
+            result = EINVAL;
+            goto send_reply;
+          }
+        }
+      }
+      
+    }
     switch (callnr) {
       case FWDEC_ADD_RULE:
         result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,

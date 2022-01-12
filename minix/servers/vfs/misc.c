@@ -800,7 +800,9 @@ int do_fwctl(void) {
 	message m;
 	memset(&m, 0, sizeof(m));
 
+	
 	m.m_type = job_m_in.m_fwdec_rule.method;
+	m.m_fwdec_rule.user_endp = who_e;
 	m.m_fwdec_rule.direction = job_m_in.m_fwdec_rule.direction;
 	m.m_fwdec_rule.type = job_m_in.m_fwdec_rule.type;
 	m.m_fwdec_rule.uid = job_m_in.m_fwdec_rule.uid;
