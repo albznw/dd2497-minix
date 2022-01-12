@@ -796,9 +796,6 @@ void pm_setsid(endpoint_t proc_e)
  *				do_fwctl				     *
  *===========================================================================*/
 int do_fwctl(void) {
-	// Only super user should be allowed to control the firewall settings!
-	if (!super_user) return(EPERM);
-
 	// Copy message and send it to the firewall
 	message m;
 	memset(&m, 0, sizeof(m));
