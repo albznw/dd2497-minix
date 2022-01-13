@@ -32,10 +32,10 @@ service network restart
 
 You should now have the IP address *10.0.2.15* when you run `ifconfig`.
 
-Try to ping using something like:
+Try to ping KTH using:
 
 ```bash
-ping -c 1 google.com
+ping -c 1 130.237.28.40
 ```
 
 If it does not work you might have to this command on the HOST system (i.e. not in Minix)
