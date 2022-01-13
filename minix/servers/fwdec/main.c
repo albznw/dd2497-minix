@@ -72,13 +72,13 @@ int main(int argc, char **argv) {
       case FWDEC_ADD_RULE:
         result = add_rule(m.m_fwdec_rule.direction, m.m_fwdec_rule.type, m.m_fwdec_rule.action,
                           m.m_fwdec_rule.ip_start, m.m_fwdec_rule.ip_end, m.m_fwdec_rule.port, m.m_fwdec_rule.p_name,
-                          m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index, m.m_fwdec_rule.uid);
+                          m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index, m.m_fwdec_rule.uid, effuid);
         break;
       case FWDEC_DEL_RULE:
-        result = delete_rule(m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index);
+        result = delete_rule(m.m_fwdec_rule.chain_id, m.m_fwdec_rule.index, effuid);
         break;
       case FWDEC_LIST_RULES:
-        list_rules(m.m_fwdec_rule.chain_id);
+        list_rules(m.m_fwdec_rule.chain_id, effuid);
         result = OK;
         break;
       default:

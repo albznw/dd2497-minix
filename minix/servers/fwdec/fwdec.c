@@ -66,17 +66,17 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
   uint32_t internal_high = ip4_from_parts(10, 0, 255, 255); 
 
   printf("Setting up rules\n\r");
-  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 1000, DROP_PACKET, NULL, OUT_RULE);
-  print_chain_rules(priv_chain);
+  insert_chain_rule(priv_chain, -1, kth_ip, kth_ip, 0, 0, 1000, DROP_PACKET, NULL, OUT_RULE, 0);
+  print_chain_rules(priv_chain, 0);
 
   //Only for testing purposes, delete later
-  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, NO_USER_ID, DROP_PACKET, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
-  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, IN_RULE);
-  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE);
-  print_chain_rules(global_chain);
+  insert_chain_rule(global_chain, -1, kth_ip, kth_ip, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE, 0);
+  insert_chain_rule(global_chain, -1, google_dns, google_dns, 0, 0, NO_USER_ID, DROP_PACKET, NULL, OUT_RULE, 0);
+  insert_chain_rule(global_chain, -1, youtube, youtube, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE, 0);
+  insert_chain_rule(global_chain, -1, localhost, localhost, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE, 0);
+  insert_chain_rule(global_chain, -1, IP_ANY, IP_ANY, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, IN_RULE, 0);
+  insert_chain_rule(global_chain, -1, internal_low, internal_high, 0, 0, NO_USER_ID, ACCEPT_PACKET, NULL, OUT_RULE, 0);
+  print_chain_rules(global_chain, 0);
 
   printf("Firewall decision server started\n\r");
   return (OK);
@@ -87,20 +87,20 @@ int sef_cb_init_fresh(int UNUSED(type), sef_init_info_t* info) {
 */
 int add_rule(uint8_t direction, uint8_t type, uint8_t action,
              uint32_t ip_start, uint32_t ip_end, uint16_t port, char* p_name,
-             uint32_t chain_id, int index, uint32_t uid) {
+             uint32_t chain_id, int index, uint32_t uid, const uid_t effuid) {
   printf("fwdec: adding rule\n\r");
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:
       insert_chain_rule(priv_chain, index, ip_start, ip_end, type,
-                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction, effuid);
       break;
     case GLOBAL_CHAIN_ID:
       insert_chain_rule(global_chain, index, ip_start, ip_end, type,
-                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction, effuid);
       break;
     case USER_CHAIN_ID:
       insert_chain_rule(user_chain, index, ip_start, ip_end, type,
-                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction);
+                        port, uid, action, *p_name != '\0' ? p_name : NULL, direction, effuid);
       break;
     default:
       printf("Error: fwdec received an invalid chain ID to add a rule to: %d\n\r", chain_id);
@@ -112,21 +112,21 @@ int add_rule(uint8_t direction, uint8_t type, uint8_t action,
 /**
   Wrapper function to delete existing rules via the command line interface (CLI).
 */
-int delete_rule(uint32_t chain_id, int index) {
+int delete_rule(uint32_t chain_id, int index, const uid_t effuid) {
   printf("fwdec: removing rule\n\r");
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:  //Delete rules for incoming packet
-      remove_chain_rule(priv_chain, index);
+      remove_chain_rule(priv_chain, index, effuid);
       /*
       remove_rule(&in_rules, ip_start, ip_end, type, port, priority, action,
                   *p_name != '\0' ? p_name : NULL);
       */
       break;
     case GLOBAL_CHAIN_ID:
-      remove_chain_rule(global_chain, index);
+      remove_chain_rule(global_chain, index, effuid);
       break;
     case USER_CHAIN_ID:
-      remove_chain_rule(user_chain, index);
+      remove_chain_rule(user_chain, index, effuid);
       break;
     default:
       printf("Error: fwdec received an invalid chain ID to delete a rule from: %d\n\r", chain_id);
@@ -144,16 +144,16 @@ int delete_rule(uint32_t chain_id, int index) {
 /**
   Listing all existing rules
 */
-void list_rules(int chain_id) {
+void list_rules(int chain_id, const uid_t effuid) {
   switch (chain_id) {
     case PRIVILEGED_CHAIN_ID:
-      print_chain_rules(priv_chain);
+      print_chain_rules(priv_chain, effuid);
       break;
     case GLOBAL_CHAIN_ID:
-      print_chain_rules(global_chain);
+      print_chain_rules(global_chain, effuid);
       break;
     case USER_CHAIN_ID:
-      print_chain_rules(user_chain);
+      print_chain_rules(user_chain, effuid);
       break;
     default:
       printf("Error: fwdec received an invalid chain ID to list rules from: %d\n\r", chain_id);

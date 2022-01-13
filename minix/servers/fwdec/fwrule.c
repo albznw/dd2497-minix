@@ -1,5 +1,6 @@
 #include "fwrule.h"
 #include "inc.h"
+#include <sys/fwctl.h>
 
 /**
  * Get a string representation of an uint32_t IP address.
@@ -20,7 +21,7 @@ void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr) {
  * @param new_rule pointer to the new rule on the heap
  * @param index wanted index
  */
-void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
+void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index, const uid_t effuid) {
   printf("Adding new rule %d %d %s\n\r", new_rule->type, new_rule->action,
          new_rule->direction == OUT_RULE ? "OUT" : "IN");
 
@@ -45,6 +46,14 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
 
   // Iterate over entries until index is found or we run out of entries
   while (c_entry) {
+
+    // Skip rule if it does not belong to user
+    if (c_entry->rule->user != effuid && chain->chain_id == USER_CHAIN_ID) {
+      last_entry = c_entry;
+      c_entry = c_entry->next;
+      continue;
+    }
+
     // Add new entry before c_entry with desired index
     if (index == c_index) {
       // The entry that will be before the new entry;
@@ -63,6 +72,7 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
       }
       return;
     }
+    
     c_index++;
     last_entry = c_entry;
     c_entry = c_entry->next;
@@ -80,11 +90,19 @@ void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index) {
  * 
  * @param index wanted index
  */
-void insert_chain_rule(fw_chain *chain, const int index, const uint32_t ip_start,
+void insert_chain_rule(fw_chain *chain, const int index,
+                       const uint32_t ip_start,
                        const uint32_t ip_end, const uint8_t type,
                        const uint16_t port, const uid_t uid,
                        const uint8_t action, const char *p_name,
-                       const uint8_t direction) {
+                       const uint8_t direction, const uid_t effuid) {
+
+  // Check permissions
+  if (effuid != 0 && chain->chain_id != USER_CHAIN_ID) {
+    printf("Error: You need permissions to add new rules to the privileged- and global chains\n\r");
+    return;
+  }
+
   // New rule and params
   fw_chain_rule *new_rule =
       (struct fw_chain_rule *)malloc(sizeof(fw_chain_rule));
@@ -103,13 +121,20 @@ void insert_chain_rule(fw_chain *chain, const int index, const uint32_t ip_start
   }
 
   // Find entries to modify. Add to chain entry linked list
-  add_chain_rule(chain, new_rule, index);
+  add_chain_rule(chain, new_rule, index, effuid);
 }
 
 /**
  * Remove the rule at the given index of the specified chain.
  */
-void remove_chain_rule(fw_chain *chain, int index) {
+void remove_chain_rule(fw_chain *chain, int index, const uid_t effuid) {
+
+  if (effuid != 0 && chain->chain_id != USER_CHAIN_ID ) {
+    printf("Error: You need root permissions to remove rules from the"
+    "privileged- and global chains\n\r");
+    return;
+  }
+
   fw_chain_entry *curr_entry = chain->head_entry;
   int curr_ind = 0;
   // Iterate over entries until index is found or we run out of entries
@@ -119,6 +144,13 @@ void remove_chain_rule(fw_chain *chain, int index) {
       printf("Error: When trying to remove a rule a chain-entry without an associated rule was found!\n\r");
       return;
     }
+
+    if (curr_rule->user != effuid && chain->chain_id == USER_CHAIN_ID) {
+      // Jump over this rule if it does not belong to the effective user
+      curr_entry = curr_entry->next;
+      continue;
+    }
+    
     if (curr_ind == index) {
       break;
     }
@@ -205,16 +237,25 @@ fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
 /**
  * Print the specified chain of rules.
  */
-void print_chain_rules(fw_chain *chain) {
+void print_chain_rules(fw_chain *chain, const uid_t effuid) {
   printf("Printing rules for chain %d\n\r", chain->chain_id);
   printf("%-5s%-8s%-10s%-8s%-16s%-16s%-6s%-16s\n\r", "type", "action", "direction", "user ID",
          "start", "end", "port", "name");
   fw_chain_entry *curr_entry = chain->head_entry;
   while (curr_entry != NULL) {
+    
+    
     fw_chain_rule *curr_rule = curr_entry->rule;
     if (curr_rule == NULL) {
       printf("Error: When trying to list rules a chain-entry without an associated rule was found!\n\r");
       return;
+    }
+
+    if(chain->chain_id == USER_CHAIN_ID){
+      if(effuid != 0 && curr_rule->user != effuid) {
+        curr_entry = curr_entry->next;
+        continue;
+      }
     }
 
     char action[7];

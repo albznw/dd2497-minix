@@ -72,6 +72,8 @@ int firewall_parse_args(firewall_args_type *fw_args, int argc, char **argv){
     char direction_str[4]; direction_str[0] = '\0';
     char action_str[7]; action_str[0] = '\0';
 
+    uid_t effuid = geteuid();
+
     // Parse "optional" input arguments
     int argument = getopt(argc, argv, GETOPTSTR);
     while (argument != -1) {
@@ -186,7 +188,7 @@ int firewall_parse_args(firewall_args_type *fw_args, int argc, char **argv){
 
         // If we supply no userID when adding a rule to the privileged chain, we default to the calling user's ID.
         if (fw_args->chain_id == PRIVILEGED_CHAIN_ID && fw_args->uid == NO_USER_ID) {
-            fw_args->uid = geteuid();
+            fw_args->uid = effuid;
         }
 
         // If the rule is added to the global chain, the rule should apply to everyone thus set the id to -1
@@ -196,7 +198,17 @@ int firewall_parse_args(firewall_args_type *fw_args, int argc, char **argv){
 
         // If the rule is added to the user chain we should use the calling user's id
         if (fw_args->chain_id == USER_CHAIN_ID) {
-            fw_args->uid = geteuid();
+            if (effuid == 0) {
+                if (fw_args->uid == NO_USER_ID) {
+                    fw_args->uid = 0;
+                    printf("Warn: You can not add a general rule to the user chain. The rule has been added with uid = 0\n\n");
+                }
+            } else {
+                if (!(fw_args->uid == effuid || fw_args->uid == NO_USER_ID)) {
+                    printf("Warn: You can not add rules for other users. This rule has been added with uid = %d\n\n", effuid);
+                }
+                fw_args->uid = effuid;
+            }
         }
 
         // Parse index

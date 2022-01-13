@@ -5,20 +5,26 @@
 
 void get_ip_string(char *buf, uint32_t buf_len, uint32_t ip_addr);
 
-void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule, int index);
+void add_chain_rule(fw_chain *chain, fw_chain_rule *new_rule,
+                    int index, const uid_t effuid);
 
-void insert_chain_rule(fw_chain *chain, const int index, const uint32_t ip_start,
-                       const uint32_t ip_end, const uint8_t type,
-                       const uint16_t port, const uid_t uid,
-                       const uint8_t action, const char *p_name,
-                       const uint8_t direction);
+void insert_chain_rule(fw_chain *chain, const int index,
+                        const uint32_t ip_start, const uint32_t ip_end,
+                        const uint8_t type, const uint16_t port,
+                        const uid_t uid, const uint8_t action,
+                        const char *p_name, const uint8_t direction,
+                        const uid_t effuid);
 
-void remove_chain_rule(fw_chain *chain, int index);
+void remove_chain_rule(fw_chain *chain, int index, const uid_t effuid);
 
-fw_chain_rule *find_matching_chain_rule(fw_chain *chain, const uint8_t type,
-                                        const uint32_t ip_addr, const uint16_t port,
-                                        const char *p_name, const uint8_t direction, const int uid);
+fw_chain_rule *find_matching_chain_rule(fw_chain *chain,
+                                        const uint8_t type,
+                                        const uint32_t ip_addr,
+                                        const uint16_t port,
+                                        const char *p_name,
+                                        const uint8_t direction,
+                                        const int uid);
 
-void print_chain_rules(fw_chain *chain);
+void print_chain_rules(fw_chain *chain, const uid_t effuid);
 
 #endif
