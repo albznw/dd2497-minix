@@ -55,6 +55,12 @@ int main(int argc, char **argv) {
       case FWDEC_DEL_RULE:
       case FWDEC_LIST_RULES:
       {
+
+        if(m.m_source != VFS_PROC_NR){
+          printf("fwdec: error, syscalls for modifying the firewall must come from vfs");
+          result = EINVAL;
+          goto send_reply;
+        }
         // Ensure an unprivileged user only performs actions on the user chain. 
         getepeffuid(m.m_fwdec_rule.user_endp, &effuid);
 
